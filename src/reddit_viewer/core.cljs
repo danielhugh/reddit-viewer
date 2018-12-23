@@ -54,10 +54,7 @@
    [:div.bounce3]])
 
 (defn fetch-posts []
-  [:div.ml-2.mr-2 {:style {:display "flex"
-                 :flex-flow "row wrap"
-                 :background-color "#eee"
-                 :border "1px solid"}}
+  [:div
    [:form
     {:action "#"}
     [:input.m-2 {:type        "text"
@@ -72,6 +69,27 @@
                      (rf/dispatch [:load-posts (str "http://www.reddit.com/r/Catloaf.json?sort=new&limit=" num-posts)])))}
      "Fetch"]]])
 
+(defn select-subreddit []
+  [:div
+   [:input.m-2 {:type        "text"
+                :placeholder "Enter subreddit"
+                :on-change   #(rf/dispatch [:set-subreddit (-> % .-target .-value)])}]
+   [:button.btn.btn-secondary
+    {:type     "button"
+     :on-click #(let [subreddit @(rf/subscribe [:get-subreddit])]
+                  (rf/dispatch [:load-posts (str "http://www.reddit.com/r/" subreddit ".json?sort=new&limit=10")]))}
+    "Get Subreddit"]])
+
+(defn custom-search-bar []
+  [:div.ml-2.mr-2 {:style {:background-color "#eee"
+                           :border           "1px solid"}}
+   [:h5 "Custom Search"]
+   [fetch-posts]
+   [select-subreddit]])
+
+(defn no-posts []
+  [:div "No posts to show! :("])
+
 (defn home-page []
   (let [view @(rf/subscribe [:view])
         posts @(rf/subscribe [:posts])]
@@ -79,14 +97,16 @@
       [loading-spinner]
       [:div
        [navbar view]
-       [fetch-posts]
-       [:div.card>div.card-block
-        [:div.btn-group
-         [sort-posts "score" :score]
-         [sort-posts "comments" :num_comments]]
-        (case @(rf/subscribe [:view])
-          :chart [chart/chart-posts-by-votes]
-          :posts [display-posts posts])]])))
+       [custom-search-bar]
+       (if (= (count posts) 0)
+         [no-posts]
+         [:div.card>div.card-block
+          [:div.btn-group
+           [sort-posts "score" :score]
+           [sort-posts "comments" :num_comments]]
+          (case @(rf/subscribe [:view])
+            :chart [chart/chart-posts-by-votes]
+            :posts [display-posts posts])])])))
 
 ;; -------------------------
 ;; Initialize app

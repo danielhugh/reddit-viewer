@@ -6,8 +6,9 @@
 (rf/reg-event-db
   :initialize-db
   (fn [_ _]
-    {:view     :posts
-     :sort-key :score}))
+    {:view      :posts
+     :sort-key  :score
+     :subreddit "Catloaf"}))
 
 (defn find-posts-with-preview [posts]
   (filter #(= (:post_hint %) "image") posts))
@@ -25,6 +26,7 @@
   (fn [[url handler]]
     (ajax/GET url
               {:handler         handler
+               :error-handler   #(js/alert "No subreddit found")
                :response-format :json
                :keywords?       true})))
 
@@ -62,3 +64,14 @@
   :get-num-posts
   (fn [db _]
     (get db :num-posts)))
+
+(rf/reg-event-db
+  :set-subreddit
+  (fn [db [_ subreddit]]
+    (assoc db :subreddit subreddit)))
+
+(rf/reg-sub
+  :get-subreddit
+  (fn [db _]
+    (get db :subreddit)))
+
