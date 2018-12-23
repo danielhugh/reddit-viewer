@@ -47,17 +47,26 @@
     [navitem "Posts" view :posts]
     [navitem "Chart" view :chart]]])
 
+(defn loading-spinner []
+  [:div.spinner
+   [:div.bounce1]
+   [:div.bounce2]
+   [:div.bounce3]])
+
 (defn home-page []
-  (let [view @(rf/subscribe [:view])]
-    [:div
-     [navbar view]
-     [:div.card>div.card-block
-      [:div.btn-group
-       [sort-posts "score" :score]
-       [sort-posts "comments" :num_comments]]
-      (case @(rf/subscribe [:view])
-        :chart [chart/chart-posts-by-votes]
-        :posts [display-posts @(rf/subscribe [:posts])])]]))
+  (let [view @(rf/subscribe [:view])
+        posts @(rf/subscribe [:posts])]
+    (if (nil? posts)
+      [loading-spinner]
+      [:div
+       [navbar view]
+       [:div.card>div.card-block
+        [:div.btn-group
+         [sort-posts "score" :score]
+         [sort-posts "comments" :num_comments]]
+        (case @(rf/subscribe [:view])
+          :chart [chart/chart-posts-by-votes]
+          :posts [display-posts posts])]])))
 
 ;; -------------------------
 ;; Initialize app
