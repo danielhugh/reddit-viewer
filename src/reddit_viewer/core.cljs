@@ -53,6 +53,25 @@
    [:div.bounce2]
    [:div.bounce3]])
 
+(defn fetch-posts []
+  [:div.ml-2.mr-2 {:style {:display "flex"
+                 :flex-flow "row wrap"
+                 :background-color "#eee"
+                 :border "1px solid"}}
+   [:form
+    {:action "#"}
+    [:input.m-2 {:type        "text"
+                 :pattern     "\\d{1,2}"
+                 :title       "Number between [1-99]"
+                 :placeholder "Enter number of posts"
+                 :on-change   #(rf/dispatch [:set-num-posts (-> % .-target .-value)])}]
+    [:button.btn.btn-secondary
+     {:type     "submit"
+      :on-click #(let [num-posts @(rf/subscribe [:get-num-posts])]
+                   (when (< 0 num-posts 100)
+                     (rf/dispatch [:load-posts (str "http://www.reddit.com/r/Catloaf.json?sort=new&limit=" num-posts)])))}
+     "Fetch"]]])
+
 (defn home-page []
   (let [view @(rf/subscribe [:view])
         posts @(rf/subscribe [:posts])]
@@ -60,6 +79,7 @@
       [loading-spinner]
       [:div
        [navbar view]
+       [fetch-posts]
        [:div.card>div.card-block
         [:div.btn-group
          [sort-posts "score" :score]
