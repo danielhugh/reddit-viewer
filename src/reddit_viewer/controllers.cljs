@@ -53,3 +53,12 @@
   (fn [db _]
     (:posts db)))
 
+(rf/reg-event-db
+  :set-num-posts
+  (fn [db [_ num]]
+    (assoc db :num-posts num)))
+
+(rf/reg-sub
+  :get-num-posts
+  (fn [db _]
+    (get db :num-posts)))
