@@ -5,13 +5,21 @@
     [reddit-viewer.controllers]
     [re-frame.core :as rf]))
 
+(def sort-keys
+  "Map of title to sort-key."
+  {"score"    :score
+   "comments" :num_comments})
+
 (defn sort-posts [title sort-key]
   [:button.btn.btn-secondary
    {:on-click #(rf/dispatch [:sort-posts sort-key])}
    (str "sort posts by " title)])
 
-;; -------------------------
-;; Views
+(defn sort-buttons [sort-keys]
+  [:div.btn-group
+   (for [[title sort-key] sort-keys]
+     ^{:key [title sort-key]}
+     [sort-posts title sort-key])])
 
 (defn display-post [{:keys [permalink subreddit title score url num_comments]}]
   [:div.card.m-2
@@ -101,9 +109,7 @@
        (if (= (count posts) 0)
          [no-posts]
          [:div.card>div.card-block
-          [:div.btn-group
-           [sort-posts "score" :score]
-           [sort-posts "comments" :num_comments]]
+          [sort-buttons sort-keys]
           (case @(rf/subscribe [:view])
             :chart [chart/chart-posts-by-votes]
             :posts [display-posts posts])])])))
