@@ -1,15 +1,17 @@
 (ns reddit-viewer.controllers
   (:require
     [ajax.core :as ajax]
+    [cuerdas.core :as str]
     [re-frame.core :as rf]))
 
 (rf/reg-event-db
   :initialize-db
   (fn [_ _]
-    {:view      :posts
-     :sort-key  :score
-     :num-posts 10
-     :subreddit "Catloaf"}))
+    {:view           :posts
+     :sort-key       :score
+     :num-posts      10
+     :subreddit      "Catloaf"
+     :subreddit/view :catloaf}))
 
 (defn find-posts-with-preview [posts]
   (filter #(= (:post_hint %) "image") posts))
@@ -21,6 +23,10 @@
               (->> (get-in posts [:data :children])
                    (map :data)
                    (find-posts-with-preview)))))
+(rf/reg-event-db
+  :subreddit/add-subreddit-tab
+  (fn [db [_ subreddit id]]
+    (update db :subreddit/tabs assoc id subreddit)))
 
 (rf/reg-fx
   :ajax-get
@@ -33,10 +39,13 @@
 
 (rf/reg-event-fx
   :load-posts
-  (fn [{db :db} _]
-    (let [num-posts (:num-posts db)
-          subreddit (:subreddit db)]
-      {:ajax-get [(str "https://www.reddit.com/r/" subreddit ".json?sort=new&limit=" num-posts) #(rf/dispatch [:set-posts %])]})))
+  (fn [{db :db} [_ subreddit num-posts]]
+    (let [id (-> subreddit (str/lower) (str/keyword))]
+      {:db       (assoc db :subreddit/view id)
+       :ajax-get [(str "https://www.reddit.com/r/" subreddit ".json?sort=new&limit=" num-posts)
+                  #(when %
+                     (rf/dispatch [:subreddit/add-subreddit-tab subreddit id])
+                     (rf/dispatch [:set-posts %]))]})))
 
 (rf/reg-event-db
   :sort-posts
@@ -77,4 +86,14 @@
   :get-subreddit
   (fn [db _]
     (get db :subreddit)))
+
+(rf/reg-sub
+  :subreddit/view
+  (fn [db _]
+    (:subreddit/view db)))
+
+(rf/reg-sub
+  :subreddit/tabs
+  (fn [db _]
+    (:subreddit/tabs db)))
 
