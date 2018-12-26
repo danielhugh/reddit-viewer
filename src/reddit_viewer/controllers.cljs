@@ -97,3 +97,9 @@
   (fn [db _]
     (:subreddit/tabs db)))
 
+(rf/reg-event-db
+  :subreddit/remove-subreddit-tab
+  (fn [db [_ id]]
+    (-> db
+      (update :subreddit/tabs dissoc id)
+      (assoc :subreddit/view "todo"))))

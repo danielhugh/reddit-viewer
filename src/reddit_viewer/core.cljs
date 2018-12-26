@@ -94,8 +94,14 @@
 (defn no-posts []
   [:div "No posts to show! :("])
 
+(defn close-tab-button [id]
+  [:span.ml-4.close
+   {:on-click #(rf/dispatch [:subreddit/remove-subreddit-tab id])}
+   "\u00D7"])
+
 (defn subreddit-tab [subreddit view id]
   [:li.nav-item
+   [close-tab-button id]
    [:a.nav-link
     {:href     "#"
      :class    (when (= id view) "active")
@@ -138,3 +144,10 @@
   (rf/dispatch-sync [:initialize-db])
   (rf/dispatch [:load-posts "Catloaf" 10])
   (mount-root))
+
+;TODO: fix active tab on main views
+;TODO: add alternate ui to return search from multiple subreddits (concat subreddit by "+" in url)
+;TODO: add ability to remove subreddit tabs
+;TODO: update the no posts to display UI
+;TODO: update error message when no subreddit exists
+;TODO: general UI improvements
