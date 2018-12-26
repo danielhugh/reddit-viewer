@@ -104,7 +104,8 @@
 
 (defn subreddit-tabs [subreddits]
   (let [view @(rf/subscribe [:subreddit/view])]
-    [:ul.nav.nav-tabs
+    [:ul.nav.nav-tabs.flex-sm-row
+     {:style {:flex-wrap "wrap"}}
      (for [[id subreddit] subreddits]
        ^{:key [id subreddit]}
        [subreddit-tab subreddit view id])]))
