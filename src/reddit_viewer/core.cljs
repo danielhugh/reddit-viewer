@@ -68,7 +68,7 @@
    [:form
     {:action "#"}
     [:input.m-2 {:type        "text"
-                 :pattern     "\\d{1,2}"
+                 :pattern     "^[1-9]\\d{0,1}$"
                  :title       "Number between [1-99]"
                  :placeholder "Enter number of posts"
                  :on-change   #(rf/dispatch [:set-num-posts (-> % .-target .-value)])}]
