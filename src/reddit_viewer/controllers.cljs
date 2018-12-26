@@ -8,6 +8,7 @@
   (fn [_ _]
     {:view      :posts
      :sort-key  :score
+     :num-posts 10
      :subreddit "Catloaf"}))
 
 (defn find-posts-with-preview [posts]
@@ -32,8 +33,10 @@
 
 (rf/reg-event-fx
   :load-posts
-  (fn [_ [_ url]]
-    {:ajax-get [url #(rf/dispatch [:set-posts %])]}))
+  (fn [{db :db} _]
+    (let [num-posts (:num-posts db)
+          subreddit (:subreddit db)]
+      {:ajax-get [(str "https://www.reddit.com/r/" subreddit ".json?sort=new&limit=" num-posts) #(rf/dispatch [:set-posts %])]})))
 
 (rf/reg-event-db
   :sort-posts

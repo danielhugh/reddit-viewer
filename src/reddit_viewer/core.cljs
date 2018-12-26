@@ -61,8 +61,10 @@
    [:div.bounce2]
    [:div.bounce3]])
 
-(defn fetch-posts []
-  [:div
+(defn custom-search-bar []
+  [:div.ml-2.mr-2 {:style {:background-color "#eee"
+                           :border           "1px solid"}}
+   [:h5 "Custom Search"]
    [:form
     {:action "#"}
     [:input.m-2 {:type        "text"
@@ -70,30 +72,15 @@
                  :title       "Number between [1-99]"
                  :placeholder "Enter number of posts"
                  :on-change   #(rf/dispatch [:set-num-posts (-> % .-target .-value)])}]
+    [:input.m-2 {:type        "text"
+                 :placeholder "Enter subreddit"
+                 :on-change   #(rf/dispatch [:set-subreddit (-> % .-target .-value)])}]
     [:button.btn.btn-secondary
      {:type     "submit"
       :on-click #(let [num-posts @(rf/subscribe [:get-num-posts])]
                    (when (< 0 num-posts 100)
-                     (rf/dispatch [:load-posts (str "http://www.reddit.com/r/Catloaf.json?sort=new&limit=" num-posts)])))}
-     "Fetch"]]])
-
-(defn select-subreddit []
-  [:div
-   [:input.m-2 {:type        "text"
-                :placeholder "Enter subreddit"
-                :on-change   #(rf/dispatch [:set-subreddit (-> % .-target .-value)])}]
-   [:button.btn.btn-secondary
-    {:type     "button"
-     :on-click #(let [subreddit @(rf/subscribe [:get-subreddit])]
-                  (rf/dispatch [:load-posts (str "http://www.reddit.com/r/" subreddit ".json?sort=new&limit=10")]))}
-    "Get Subreddit"]])
-
-(defn custom-search-bar []
-  [:div.ml-2.mr-2 {:style {:background-color "#eee"
-                           :border           "1px solid"}}
-   [:h5 "Custom Search"]
-   [fetch-posts]
-   [select-subreddit]])
+                     (rf/dispatch [:load-posts])))}
+     "Search"]]])
 
 (defn no-posts []
   [:div "No posts to show! :("])
@@ -122,5 +109,5 @@
 
 (defn init! []
   (rf/dispatch-sync [:initialize-db])
-  (rf/dispatch [:load-posts "http://www.reddit.com/r/Catloaf.json?sort=new&limit=10"])
+  (rf/dispatch [:load-posts])
   (mount-root))
