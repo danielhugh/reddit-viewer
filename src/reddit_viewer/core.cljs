@@ -1,5 +1,6 @@
 (ns reddit-viewer.core
   (:require
+    [cuerdas.core :as str]
     [reagent.core :as r]
     [reddit-viewer.chart :as chart]
     [reddit-viewer.controllers]
@@ -68,18 +69,25 @@
    [:form
     {:action "#"}
     [:input.m-2 {:type        "text"
-                 :pattern     "^[1-9]\\d{0,1}$"
+                 :pattern     "^[1-9]{1}\\d?$"
                  :title       "Number between [1-99]"
                  :placeholder "Enter number of posts"
                  :on-change   #(rf/dispatch [:set-num-posts (-> % .-target .-value)])}]
     [:input.m-2 {:type        "text"
+                 :pattern     "^(?!\\s*$).+"
+                 :required    true
+                 :title       "Enter subreddit"
                  :placeholder "Enter subreddit"
                  :on-change   #(rf/dispatch [:set-subreddit (-> % .-target .-value)])}]
     [:button.btn.btn-secondary
      {:type     "submit"
       :on-click #(let [subreddit @(rf/subscribe [:get-subreddit])
-                       num-posts @(rf/subscribe [:get-num-posts])]
-                   (when (< 0 num-posts 100)
+                       num-posts (if (str/blank? @(rf/subscribe [:get-num-posts]))
+                                   10
+                                   @(rf/subscribe [:get-num-posts]))]
+                   (when (and
+                           (not (str/blank? subreddit))
+                           (< 0 num-posts 100))
                      (rf/dispatch [:load-posts subreddit num-posts])))}
      "Search"]]])
 
