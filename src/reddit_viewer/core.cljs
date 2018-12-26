@@ -77,22 +77,40 @@
                  :on-change   #(rf/dispatch [:set-subreddit (-> % .-target .-value)])}]
     [:button.btn.btn-secondary
      {:type     "submit"
-      :on-click #(let [num-posts @(rf/subscribe [:get-num-posts])]
+      :on-click #(let [subreddit @(rf/subscribe [:get-subreddit])
+                       num-posts @(rf/subscribe [:get-num-posts])]
                    (when (< 0 num-posts 100)
-                     (rf/dispatch [:load-posts])))}
+                     (rf/dispatch [:load-posts subreddit num-posts])))}
      "Search"]]])
 
 (defn no-posts []
   [:div "No posts to show! :("])
 
+(defn subreddit-tab [subreddit view id]
+  [:li.nav-item
+   [:a.nav-link
+    {:href     "#"
+     :class    (when (= id view) "active")
+     :on-click #(rf/dispatch [:load-posts subreddit 10])}
+    subreddit]])
+
+(defn subreddit-tabs [subreddits]
+  (let [view @(rf/subscribe [:subreddit/view])]
+    [:ul.nav.nav-tabs
+     (for [[id subreddit] subreddits]
+       ^{:key [id subreddit]}
+       [subreddit-tab subreddit view id])]))
+
 (defn home-page []
   (let [view @(rf/subscribe [:view])
-        posts @(rf/subscribe [:posts])]
+        posts @(rf/subscribe [:posts])
+        subreddits @(rf/subscribe [:subreddit/tabs])]
     (if (nil? posts)
       [loading-spinner]
       [:div
        [navbar view]
        [custom-search-bar]
+       [subreddit-tabs subreddits]
        (if (= (count posts) 0)
          [no-posts]
          [:div.card>div.card-block
@@ -109,5 +127,5 @@
 
 (defn init! []
   (rf/dispatch-sync [:initialize-db])
-  (rf/dispatch [:load-posts])
+  (rf/dispatch [:load-posts "Catloaf" 10])
   (mount-root))
