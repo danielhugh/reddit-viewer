@@ -1,7 +1,7 @@
 (ns reddit-viewer.controllers
   (:require
     [ajax.core :as ajax]
-    [cuerdas.core :as str]
+    [reddit-viewer.utils :as utils]
     [re-frame.core :as rf]))
 
 (rf/reg-event-db
@@ -9,9 +9,7 @@
   (fn [_ _]
     {:view           :posts
      :sort-key       :score
-     :num-posts      10
-     :subreddit      "Catloaf"
-     :subreddit/view :catloaf}))
+     :subreddit/tabs []}))
 
 (defn find-posts-with-preview [posts]
   (filter #(= (:post_hint %) "image") posts))
@@ -23,10 +21,11 @@
               (->> (get-in posts [:data :children])
                    (map :data)
                    (find-posts-with-preview)))))
+
 (rf/reg-event-db
   :subreddit/add-subreddit-tab
   (fn [db [_ subreddit id]]
-    (update db :subreddit/tabs assoc id subreddit)))
+    (update db :subreddit/tabs conj [id subreddit])))
 
 (rf/reg-fx
   :ajax-get
@@ -37,12 +36,14 @@
                :response-format :json
                :keywords?       true})))
 
+
 (rf/reg-event-fx
   :load-posts
   (fn [{db :db} [_ subreddit num-posts]]
-    (let [id (-> subreddit (str/lower) (str/keyword))]
+    (let [id (utils/generate-uuid subreddit)
+          reddit-url (utils/generate-reddit-url subreddit num-posts)]
       {:db       (assoc db :subreddit/view id)
-       :ajax-get [(str "https://www.reddit.com/r/" subreddit ".json?sort=new&limit=" num-posts)
+       :ajax-get [reddit-url
                   #(when %
                      (rf/dispatch [:subreddit/add-subreddit-tab subreddit id])
                      (rf/dispatch [:set-posts %]))]})))
@@ -97,9 +98,15 @@
   (fn [db _]
     (:subreddit/tabs db)))
 
-(rf/reg-event-db
+(rf/reg-event-fx
   :subreddit/remove-subreddit-tab
-  (fn [db [_ id]]
-    (-> db
-      (update :subreddit/tabs dissoc id)
-      (assoc :subreddit/view "todo"))))
+  (fn [{db :db} [_ evict-id]]
+    (let [tabs (:subreddit/tabs db)
+          evict-index (utils/get-evict-tab-index tabs evict-id)
+          replacement-index (utils/get-replacement-tab-index tabs evict-index)
+          [new-id subreddit] (get tabs replacement-index)
+          reddit-url (utils/generate-reddit-url subreddit 10)]
+      {:db       (-> db
+                     (update :subreddit/tabs utils/remove-by-index evict-index)
+                     (assoc :subreddit/view new-id))
+       :ajax-get [reddit-url #(rf/dispatch [:set-posts %])]})))
