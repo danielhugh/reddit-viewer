@@ -104,22 +104,22 @@
    {:on-click #(rf/dispatch [:subreddit/remove-subreddit-tab id])}
    "\u00D7"])
 
-(defn subreddit-tab [subreddit view id]
+(defn subreddit-tab [title view id]
   [:li.nav-item
    [close-tab-button id]
    [:a.nav-link
     {:href     "#"
      :class    (when (= id view) "active")
-     :on-click #(rf/dispatch [:subreddit/swap-view id subreddit])}
-    subreddit]])
+     :on-click #(rf/dispatch [:subreddit/swap-view id title])}
+    title]])
 
 (defn subreddit-tabs [subreddits]
   (let [view @(rf/subscribe [:subreddit/view])]
     [:ul.nav.nav-tabs.flex-sm-row
      {:style {:flex-wrap "wrap"}}
-     (for [[id subreddit] subreddits]
-       ^{:key [id subreddit]}
-       [subreddit-tab subreddit view id])]))
+     (for [{id :id title :title :as subreddit} subreddits]
+       ^{:key subreddit}
+       [subreddit-tab title view id])]))
 
 (defn home-page []
   (let [view @(rf/subscribe [:view])

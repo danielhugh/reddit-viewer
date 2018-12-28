@@ -10,7 +10,7 @@
 
 (defn get-evict-tab-index [tabs evict-id]
   (first (keep-indexed
-           (fn [index [id _]]
+           (fn [index {id :id}]
              (if (= id evict-id)
                index))
            tabs)))

@@ -25,7 +25,8 @@
 (rf/reg-event-db
   :subreddit/add-subreddit-tab
   (fn [db [_ id subreddit]]
-    (update db :subreddit/tabs conj [id subreddit])))
+    (update db :subreddit/tabs conj {:id    id
+                                     :title subreddit})))
 
 (rf/reg-fx
   :ajax-get
@@ -112,7 +113,7 @@
     (let [tabs (:subreddit/tabs db)
           evict-index (utils/get-evict-tab-index tabs evict-id)
           replacement-index (utils/get-replacement-tab-index tabs evict-index)
-          [new-id new-subreddit] (get tabs replacement-index)
+          {new-id :id new-subreddit :title} (get tabs replacement-index)
           reddit-url (utils/generate-reddit-url new-subreddit 10)
           evict-current? (= evict-id (:subreddit/view db))]
       (merge (if evict-current?
@@ -120,5 +121,4 @@
              {:db (-> db
                       (update :subreddit/tabs utils/remove-by-index evict-index)
                       (cond->
-                        evict-current? (assoc :subreddit/view new-id)))
-              }))))
+                        evict-current? (assoc :subreddit/view new-id)))}))))
