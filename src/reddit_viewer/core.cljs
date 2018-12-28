@@ -169,11 +169,3 @@
   (rf/dispatch-sync [:initialize-db])
   (rf/dispatch [:load-posts "Catloaf" 10])
   (mount-root))
-
-;TODO: update the no posts to display UI
-; refactor 0 posts div into display-posts
-; add a no tabs view
-; note: posts still retain their content of the last last tab if deleted
-
-;TODO: update error message when no subreddit exists
-;TODO: general UI improvements

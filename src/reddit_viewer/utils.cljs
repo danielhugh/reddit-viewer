@@ -24,13 +24,13 @@
     ;; the right most tab
     (= (inc evict-index) (count tabs))
     (if (= 1 (count tabs))
-      (do (println "only one") 0)
-      (do (println "left") (dec evict-index)))
+      0
+      (dec evict-index))
 
     ;; otherwise its a tab somewhere in the middle, take the right tab
     (< (inc evict-index) (count tabs))
     (inc evict-index)
 
-    ; should not happen
+    ;; should not happen
     :else
-    (do (js/alert "moo") nil)))
+    (do (js/alert "Something went wrong >:|") nil)))
