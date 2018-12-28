@@ -43,7 +43,7 @@
 
 (defn navitem [title view id]
   [:li.nav-item
-   {:class-name (when (= id view) "active")}
+   {:class (when (= id view) "active")}
    [:a.nav-link
     {:href     "#"
      :on-click #(rf/dispatch [:select-view id])}
@@ -52,7 +52,6 @@
 (defn navbar [view]
   [:nav.navbar.navbar-toggleable-md.navbar-light.bg-faded
    [:ul.navbar-nav.mr-auto.nav
-    {:class-name "navbar-nav mr-auto"}
     [navitem "Posts" view :posts]
     [navitem "Chart" view :chart]]])
 
