@@ -29,10 +29,12 @@
 
 (rf/reg-fx
   :ajax-get
-  (fn [[url handler]]
+  (fn [[url handler & [error-handler]]]
     (ajax/GET url
               {:handler         handler
-               :error-handler   #(js/alert "No subreddit found")
+               :error-handler   (if error-handler
+                                  #(js/alert "custom error here")
+                                  #(js/alert "No subreddit found"))
                :response-format :json
                :keywords?       true})))
 
