@@ -93,7 +93,7 @@
                            (< 0 num-posts 100))
                      (rf/dispatch [:load-posts subreddit num-posts])
                      (rf/dispatch [:set-num-posts nil])
-                     (rf/dispatch [:set-subreddit nil])))}
+                     (rf/dispatch [:set-subreddit ""])))}
      "Search"]]])
 
 (defn no-posts []
@@ -110,7 +110,7 @@
    [:a.nav-link
     {:href     "#"
      :class    (when (= id view) "active")
-     :on-click #(rf/dispatch [:load-posts subreddit 10])}
+     :on-click #(rf/dispatch [:subreddit/swap-view id subreddit])}
     subreddit]])
 
 (defn subreddit-tabs [subreddits]
