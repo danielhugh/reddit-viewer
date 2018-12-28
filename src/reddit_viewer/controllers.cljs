@@ -111,14 +111,18 @@
   :subreddit/remove-subreddit-tab
   (fn [{db :db} [_ evict-id]]
     (let [tabs (:subreddit/tabs db)
+          view (:subreddit/view db)
           evict-index (utils/get-evict-tab-index tabs evict-id)
           replacement-index (utils/get-replacement-tab-index tabs evict-index)
           {new-id :id new-subreddit :title} (get tabs replacement-index)
           reddit-url (utils/generate-reddit-url new-subreddit 10)
-          evict-current? (= evict-id (:subreddit/view db))]
-      (merge (if evict-current?
+          evict-current? (= evict-id view)]
+      (merge (if (and evict-current? (> (count tabs) 1))
                {:ajax-get [reddit-url #(rf/dispatch [:set-posts %])]})
              {:db (-> db
-                      (update :subreddit/tabs utils/remove-by-index evict-index)
                       (cond->
-                        evict-current? (assoc :subreddit/view new-id)))}))))
+                        evict-current? (assoc :subreddit/view new-id)
+                        (= (count tabs) 1) (->
+                                             (assoc :posts [])
+                                             (assoc :subreddit/view nil)))
+                      (update :subreddit/tabs utils/remove-by-index evict-index))}))))
