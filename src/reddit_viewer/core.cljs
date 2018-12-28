@@ -104,6 +104,9 @@
 (defn no-posts []
   [:div "No posts to show! :("])
 
+(defn no-tabs []
+  [:div "Please search for a subreddit :)"])
+
 (defn close-tab-button [id]
   [:span.ml-4.close
    {:on-click #(rf/dispatch [:subreddit/remove-subreddit-tab id])}
@@ -136,13 +139,15 @@
        [navbar view]
        [custom-search-bar]
        [subreddit-tabs subreddits]
-       (if (= (count posts) 0)
-         [no-posts]
-         [:div.card>div.card-block
-          [sort-buttons sort-keys]
-          (case @(rf/subscribe [:view])
-            :chart [chart/chart-posts-by-votes]
-            :posts [display-posts posts])])])))
+       (if (empty? subreddits)
+         [no-tabs]
+         (if (empty? posts)
+           [no-posts]
+           [:div.card>div.card-block
+            [sort-buttons sort-keys]
+            (case @(rf/subscribe [:view])
+              :chart [chart/chart-posts-by-votes]
+              :posts [display-posts posts])]))])))
 
 ;; -------------------------
 ;; Initialize app
@@ -155,9 +160,10 @@
   (rf/dispatch [:load-posts "Catloaf" 10])
   (mount-root))
 
-;TODO: fix active tab on main views
-;TODO: add alternate ui to return search from multiple subreddits (concat subreddit by "+" in url)
-;TODO: add ability to remove subreddit tabs
 ;TODO: update the no posts to display UI
+; refactor 0 posts div into display-posts
+; add a no tabs view
+; note: posts still retain their content of the last last tab if deleted
+
 ;TODO: update error message when no subreddit exists
 ;TODO: general UI improvements
