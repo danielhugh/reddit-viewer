@@ -123,7 +123,8 @@
    [:a.nav-link
     {:href     "#"
      :class    (when (= id view) "active")
-     :on-click #(rf/dispatch [:subreddit/swap-view id title])}
+     :on-click #(if (= "A" (-> % .-target .-nodeName))
+                  (rf/dispatch [:subreddit/swap-view id title]))}
     title
     [close-tab-button id]]])
 
