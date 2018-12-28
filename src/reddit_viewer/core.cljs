@@ -55,7 +55,7 @@
     title]])
 
 (defn navbar [view]
-  [:nav.navbar.navbar-toggleable-md.navbar-light.bg-faded
+  [:nav.navbar.navbar-toggleable-md.navbar-light.bg-faded.fixed-top
    [:ul.navbar-nav.mr-auto.nav
     (for [[title view-id] navbar-items]
       ^{:key [title view-id]}
@@ -68,9 +68,9 @@
    [:div.bounce3]])
 
 (defn custom-search-bar []
-  [:div.ml-2.mr-2 {:style {:background-color "#eee"
-                           :border           "1px solid"}}
-   [:h5 "Custom Search"]
+  [:div {:style {:background-color "#eee"
+                 :border           "1px solid"}}
+   [:h5.m-2 "Search Subreddit"]
    [:form
     {:action "#"}
     [:input.m-2 {:type        "text"
@@ -102,10 +102,10 @@
      "Search"]]])
 
 (defn no-posts []
-  [:div "No posts to show! :("])
+  [:div.pt-2 "No posts to show! :("])
 
 (defn no-tabs []
-  [:div "Please search for a subreddit :)"])
+  [:div.pt-2 "Please search for a subreddit :)"])
 
 (defn close-tab-button [id]
   [:span.ml-4.close
@@ -123,7 +123,7 @@
 
 (defn subreddit-tabs [subreddits]
   (let [view @(rf/subscribe [:subreddit/view])]
-    [:ul.nav.nav-tabs.flex-sm-row
+    [:ul.nav.nav-tabs.flex-sm-row.pt-2
      {:style {:flex-wrap "wrap"}}
      (for [{id :id title :title :as subreddit} subreddits]
        ^{:key subreddit}
@@ -137,17 +137,20 @@
       [loading-spinner]
       [:div
        [navbar view]
-       [custom-search-bar]
-       [subreddit-tabs subreddits]
-       (if (empty? subreddits)
-         [no-tabs]
-         (if (empty? posts)
-           [no-posts]
-           [:div.card>div.card-block
-            [sort-buttons sort-keys]
-            (case @(rf/subscribe [:view])
-              :chart [chart/chart-posts-by-votes]
-              :posts [display-posts posts])]))])))
+       [:div.container
+        {:style {:width       "100%"
+                 :padding-top "57px"}}
+        [custom-search-bar]
+        [subreddit-tabs subreddits]
+        (if (empty? subreddits)
+          [no-tabs]
+          (if (empty? posts)
+            [no-posts]
+            [:div.card>div.card-block
+             [sort-buttons sort-keys]
+             (case @(rf/subscribe [:view])
+               :chart [chart/chart-posts-by-votes]
+               :posts [display-posts posts])]))]])))
 
 ;; -------------------------
 ;; Initialize app
