@@ -70,14 +70,17 @@
     {:action "#"}
     [:input.m-2 {:type        "text"
                  :pattern     "^[1-9]{1}\\d?$"
+                 :required    true
                  :title       "Number between [1-99]"
                  :placeholder "Enter number of posts"
+                 :value       (or @(rf/subscribe [:get-num-posts]))
                  :on-change   #(rf/dispatch [:set-num-posts (-> % .-target .-value)])}]
     [:input.m-2 {:type        "text"
                  :pattern     "^(?!\\s*$).+"
                  :required    true
                  :title       "Enter subreddit"
                  :placeholder "Enter subreddit"
+                 :value       (or @(rf/subscribe [:get-subreddit]))
                  :on-change   #(rf/dispatch [:set-subreddit (-> % .-target .-value)])}]
     [:button.btn.btn-secondary
      {:type     "submit"
@@ -88,7 +91,9 @@
                    (when (and
                            (not (str/blank? subreddit))
                            (< 0 num-posts 100))
-                     (rf/dispatch [:load-posts subreddit num-posts])))}
+                     (rf/dispatch [:load-posts subreddit num-posts])
+                     (rf/dispatch [:set-num-posts nil])
+                     (rf/dispatch [:set-subreddit nil])))}
      "Search"]]])
 
 (defn no-posts []

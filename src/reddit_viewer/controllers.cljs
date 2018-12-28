@@ -108,7 +108,9 @@
           replacement-index (utils/get-replacement-tab-index tabs evict-index)
           [new-id subreddit] (get tabs replacement-index)
           reddit-url (utils/generate-reddit-url subreddit 10)]
-      {:db       (-> db
-                     (update :subreddit/tabs utils/remove-by-index evict-index)
-                     (assoc :subreddit/view new-id))
-       :ajax-get [reddit-url #(rf/dispatch [:set-posts %])]})))
+      (merge (if (= evict-id (:subreddit/view db))
+               {:ajax-get [reddit-url #(rf/dispatch [:set-posts %])]})
+             {:db (-> db
+                      (update :subreddit/tabs utils/remove-by-index evict-index)
+                      (assoc :subreddit/view new-id))
+              }))))
