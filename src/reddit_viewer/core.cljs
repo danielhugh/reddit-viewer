@@ -108,18 +108,20 @@
   [:div.pt-2 "Please search for a subreddit :)"])
 
 (defn close-tab-button [id]
-  [:span.ml-4.close
+  [:span.pl-2.close
    {:on-click #(rf/dispatch [:subreddit/remove-subreddit-tab id])}
    "\u00D7"])
 
 (defn subreddit-tab [title view id]
   [:li.nav-item
-   [close-tab-button id]
+   {:style {:display "flex"
+            :flex-direction "row"}}
    [:a.nav-link
     {:href     "#"
      :class    (when (= id view) "active")
      :on-click #(rf/dispatch [:subreddit/swap-view id title])}
-    title]])
+    title
+    [close-tab-button id]]])
 
 (defn subreddit-tabs [subreddits]
   (let [view @(rf/subscribe [:subreddit/view])]
