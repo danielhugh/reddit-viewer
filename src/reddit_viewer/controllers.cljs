@@ -24,7 +24,7 @@
 
 (rf/reg-event-db
   :subreddit/add-subreddit-tab
-  (fn [db [_ subreddit id]]
+  (fn [db [_ id subreddit]]
     (update db :subreddit/tabs conj [id subreddit])))
 
 (rf/reg-fx
@@ -38,6 +38,12 @@
                :response-format :json
                :keywords?       true})))
 
+(rf/reg-event-fx
+  :subreddit/swap-view
+  (fn [{db :db} [_ id subreddit]]
+    (let [reddit-url (utils/generate-reddit-url subreddit 10)]
+      {:db       (assoc db :subreddit/view id)
+       :ajax-get [reddit-url #(rf/dispatch [:set-posts %])]})))
 
 (rf/reg-event-fx
   :load-posts
@@ -47,7 +53,7 @@
       {:db       (assoc db :subreddit/view id)
        :ajax-get [reddit-url
                   #(when %
-                     (rf/dispatch [:subreddit/add-subreddit-tab subreddit id])
+                     (rf/dispatch [:subreddit/add-subreddit-tab id subreddit])
                      (rf/dispatch [:set-posts %]))]})))
 
 (rf/reg-event-db
@@ -106,11 +112,13 @@
     (let [tabs (:subreddit/tabs db)
           evict-index (utils/get-evict-tab-index tabs evict-id)
           replacement-index (utils/get-replacement-tab-index tabs evict-index)
-          [new-id subreddit] (get tabs replacement-index)
-          reddit-url (utils/generate-reddit-url subreddit 10)]
-      (merge (if (= evict-id (:subreddit/view db))
+          [new-id new-subreddit] (get tabs replacement-index)
+          reddit-url (utils/generate-reddit-url new-subreddit 10)
+          evict-current? (= evict-id (:subreddit/view db))]
+      (merge (if evict-current?
                {:ajax-get [reddit-url #(rf/dispatch [:set-posts %])]})
              {:db (-> db
                       (update :subreddit/tabs utils/remove-by-index evict-index)
-                      (assoc :subreddit/view new-id))
+                      (cond->
+                        evict-current? (assoc :subreddit/view new-id)))
               }))))
