@@ -11,6 +11,11 @@
   {"score"    :score
    "comments" :num_comments})
 
+(def navbar-items
+  "Map of title to view id"
+  {"Posts" :posts
+   "Chart" :chart})
+
 (defn sort-posts [title sort-key]
   [:button.btn.btn-secondary
    {:on-click #(rf/dispatch [:sort-posts sort-key])}
@@ -52,8 +57,9 @@
 (defn navbar [view]
   [:nav.navbar.navbar-toggleable-md.navbar-light.bg-faded
    [:ul.navbar-nav.mr-auto.nav
-    [navitem "Posts" view :posts]
-    [navitem "Chart" view :chart]]])
+    (for [[title view-id] navbar-items]
+      ^{:key [title view-id]}
+      [navitem title view view-id])]])
 
 (defn loading-spinner []
   [:div.spinner
