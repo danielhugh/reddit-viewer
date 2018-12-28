@@ -67,39 +67,43 @@
    [:div.bounce2]
    [:div.bounce3]])
 
+(defn reset-form-fields []
+  (rf/dispatch [:set-subreddit ""])
+  (rf/dispatch [:set-num-posts nil]))
+
 (defn custom-search-bar []
-  [:div {:style {:background-color "#eee"
-                 :border           "1px solid"}}
-   [:h5.m-2 "Search Subreddit"]
-   [:form
-    {:action "#"}
-    [:input.m-2 {:type        "text"
-                 :pattern     "^[1-9]{1}\\d?$"
-                 :required    true
-                 :title       "Number between [1-99]"
-                 :placeholder "Enter number of posts"
-                 :value       (or @(rf/subscribe [:get-num-posts]))
-                 :on-change   #(rf/dispatch [:set-num-posts (-> % .-target .-value)])}]
-    [:input.m-2 {:type        "text"
-                 :pattern     "^(?!\\s*$).+"
-                 :required    true
-                 :title       "Enter subreddit"
-                 :placeholder "Enter subreddit"
-                 :value       (or @(rf/subscribe [:get-subreddit]))
-                 :on-change   #(rf/dispatch [:set-subreddit (-> % .-target .-value)])}]
-    [:button.btn.btn-secondary
-     {:type     "submit"
-      :on-click #(let [subreddit @(rf/subscribe [:get-subreddit])
-                       num-posts (if (str/blank? @(rf/subscribe [:get-num-posts]))
-                                   10
-                                   @(rf/subscribe [:get-num-posts]))]
-                   (when (and
-                           (not (str/blank? subreddit))
-                           (< 0 num-posts 100))
-                     (rf/dispatch [:load-posts subreddit num-posts])
-                     (rf/dispatch [:set-num-posts nil])
-                     (rf/dispatch [:set-subreddit ""])))}
-     "Search"]]])
+  (r/with-let [_ (reset-form-fields)]
+    [:div {:style {:background-color "#eee"
+                   :border           "1px solid"}}
+     [:h5.m-2 "Search Subreddit"]
+     [:form
+      {:action "#"}
+      [:input.m-2 {:type        "text"
+                   :pattern     "^[1-9]{1}\\d?$"
+                   :required    true
+                   :title       "Number between [1-99]"
+                   :placeholder "Enter number of posts"
+                   :value       (or @(rf/subscribe [:get-num-posts]))
+                   :on-change   #(rf/dispatch [:set-num-posts (-> % .-target .-value)])}]
+      [:input.m-2 {:type        "text"
+                   :pattern     "^(?!\\s*$).+"
+                   :required    true
+                   :title       "Enter subreddit"
+                   :placeholder "Enter subreddit"
+                   :value       (or @(rf/subscribe [:get-subreddit]))
+                   :on-change   #(rf/dispatch [:set-subreddit (-> % .-target .-value)])}]
+      [:button.btn.btn-secondary
+       {:type     "submit"
+        :on-click #(let [subreddit @(rf/subscribe [:get-subreddit])
+                         num-posts (if (str/blank? @(rf/subscribe [:get-num-posts]))
+                                     10
+                                     @(rf/subscribe [:get-num-posts]))]
+                     (when (and
+                             (not (str/blank? subreddit))
+                             (< 0 num-posts 100))
+                       (rf/dispatch [:load-posts subreddit num-posts])
+                       (reset-form-fields)))}
+       "Search"]]]))
 
 (defn no-posts []
   [:div.pt-2 "No posts to show! :("])
