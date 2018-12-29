@@ -32,12 +32,13 @@
   :ajax-get
   (fn [[url handler & [error-handler]]]
     (ajax/GET url
-              {:handler         handler
-               :error-handler   (if error-handler
-                                  #(js/alert "custom error here")
-                                  #(js/alert "No subreddit found"))
-               :response-format :json
-               :keywords?       true})))
+              (merge
+                {:handler         handler
+                 :error-handler   #(js/alert "Unexpected error!")
+                 :response-format :json
+                 :keywords?       true}
+                (if error-handler
+                  {:error-handler error-handler})))))
 
 (rf/reg-event-fx
   :subreddit/swap-view
@@ -55,7 +56,8 @@
        :ajax-get [reddit-url
                   #(when %
                      (rf/dispatch [:subreddit/add-subreddit-tab id subreddit])
-                     (rf/dispatch [:set-posts %]))]})))
+                     (rf/dispatch [:set-posts %]))
+                  #(js/alert "No subreddit found.")]})))
 
 (rf/reg-event-db
   :sort-posts
