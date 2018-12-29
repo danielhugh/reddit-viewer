@@ -1,1 +1,1 @@
-web: lein figwheel
+web: lein figwheel $PORT
