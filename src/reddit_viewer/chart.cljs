@@ -2,6 +2,7 @@
   (:require
    ["chart.js" :as chart]
    [reagent.core :as r]
+   [reagent.dom :as rdom]
    [re-frame.core :as rf]))
 
 (defn render-data [node data]
@@ -25,7 +26,7 @@
   (fn [component]
     (when-let [posts @(rf/subscribe [:posts])]
       (destroy-chart chart)
-      (reset! chart (render-data (r/dom-node component) posts)))))
+      (reset! chart (render-data (rdom/dom-node component) posts)))))
 
 (defn render-canvas []
   (when @(rf/subscribe [:posts]) [:canvas]))

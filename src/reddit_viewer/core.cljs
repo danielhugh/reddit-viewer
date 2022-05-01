@@ -2,6 +2,7 @@
   (:require
     [cuerdas.core :as str]
     [reagent.core :as r]
+    [reagent.dom :as rdom]
     [reddit-viewer.chart :as chart]
     [reddit-viewer.controllers]
     [re-frame.core :as rf]))
@@ -163,7 +164,7 @@
 ;; Initialize app
 
 (defn mount-root []
-  (r/render [home-page] (.getElementById js/document "app")))
+  (rdom/render [home-page] (.getElementById js/document "app")))
 
 (defn init! []
   (rf/dispatch-sync [:initialize-db])
