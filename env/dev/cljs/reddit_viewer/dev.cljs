@@ -1,4 +1,4 @@
-(ns ^:figwheel-no-load reddit-viewer.dev
+(ns reddit-viewer.dev
   (:require
     [reddit-viewer.core :as core]
     [devtools.core :as devtools]))
