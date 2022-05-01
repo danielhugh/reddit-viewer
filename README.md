@@ -1,23 +1,22 @@
 
 ### Development mode
 
-To start the Figwheel compiler, navigate to the project folder and run the following command in the terminal:
+To start developing navigate to the project folder and run the following command in the terminal:
 
 ```
-lein figwheel
+clj -M:dev:shadow-cljs watch app
 ```
 
-Figwheel will automatically push cljs changes to the browser.
-Once Figwheel starts up, you should be able to open the `public/index.html` page in the browser.
+Browser to http://localhost:8080 to view the running app.
 
 ### REPL
 
-The project is setup to start nREPL on port `7002` once Figwheel starts.
-Once you connect to the nREPL, run `(cljs)` to switch to the ClojureScript REPL.
+The project is setup to start nREPL on port `7002`.
 
 ### Building for production
 
+Create the release build:
+
 ```
-lein clean
-lein package
+clj -M:shadow-cljs release app
 ```
