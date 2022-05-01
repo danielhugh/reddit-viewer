@@ -1,11 +1,4 @@
-(ns user
- (:require [figwheel-sidecar.repl-api :as ra]))
+(ns user)
 
-(defn start-fw []
- (ra/start-figwheel!))
+(println "Loaded user.clj")
 
-(defn stop-fw []
- (ra/stop-figwheel!))
-
-(defn cljs []
- (ra/cljs-repl))

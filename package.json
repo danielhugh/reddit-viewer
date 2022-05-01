@@ -1,0 +1,12 @@
+{
+  "name": "reddit-viewer",
+  "dependencies": {
+    "chart.js": "2.7.3",
+    "create-react-class": "15.6.2",
+    "highlight.js": "9.18.1",
+    "react-dom": "16.3.0",
+    "react-highlight.js": "1.0.7",
+    "react": "16.3.0",    
+    "xregexp": "4.2.0"
+  }
+}
