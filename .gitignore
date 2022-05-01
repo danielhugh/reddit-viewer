@@ -17,3 +17,8 @@ pom.xml.asc
 /.idea
 /.rebel_readline_history
 /reddit-viewer.iml
+
+.calva/*
+.clj-kondo/.cache/
+.lsp/.cache/
+.cpcache/
