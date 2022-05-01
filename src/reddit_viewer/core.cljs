@@ -163,8 +163,11 @@
 ;; -------------------------
 ;; Initialize app
 
-(defn mount-root []
-  (rdom/render [home-page] (.getElementById js/document "app")))
+(defn ^:dev/after-load mount-root []
+  (rf/clear-subscription-cache!)
+  (let [root-el (.getElementById js/document "app")]
+    (rdom/unmount-component-at-node root-el)
+    (rdom/render [home-page] root-el)))
 
 (defn init! []
   (rf/dispatch-sync [:initialize-db])
