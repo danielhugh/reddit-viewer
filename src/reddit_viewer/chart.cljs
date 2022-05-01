@@ -1,20 +1,20 @@
 (ns reddit-viewer.chart
   (:require
-    [cljsjs.chartjs]
-    [reagent.core :as r]
-    [re-frame.core :as rf]))
+   ["chart.js" :as chart]
+   [reagent.core :as r]
+   [re-frame.core :as rf]))
 
 (defn render-data [node data]
-  (js/Chart.
-    node
-    (clj->js
-      {:type    "bar"
-       :data    {:labels   (map :title data)
-                 :datasets [{:label "votes"
-                             :data  (map :score data)}
-                            #_{:label "comments"
-                               :data  (map :num_comments data)}]}
-       :options {:scales {:xAxes [{:display false}]}}})))
+  (chart.
+   node
+   (clj->js
+    {:type    "bar"
+     :data    {:labels   (map :title data)
+               :datasets [{:label "votes"
+                           :data  (map :score data)}
+                          #_{:label "comments"
+                             :data  (map :num_comments data)}]}
+     :options {:scales {:xAxes [{:display false}]}}})))
 
 (defn destroy-chart [chart]
   (when @chart
