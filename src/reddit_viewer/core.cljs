@@ -1,11 +1,11 @@
 (ns reddit-viewer.core
   (:require
-    [cuerdas.core :as str]
-    [reagent.core :as r]
-    [reagent.dom :as rdom]
-    [reddit-viewer.chart :as chart]
-    [reddit-viewer.controllers]
-    [re-frame.core :as rf]))
+   [cuerdas.core :as str]
+   [reagent.core :as r]
+   [reagent.dom :as rdom]
+   [reddit-viewer.chart :as chart]
+   [reddit-viewer.controllers]
+   [re-frame.core :as rf]))
 
 (def sort-keys
   "Map of title to sort-key."
@@ -80,19 +80,19 @@
      [:form
       {:action "#"}
       [:input.m-2 {:type        "text"
-                   :pattern     "^[1-9]{1}\\d?$"
-                   :required    true
-                   :title       "Number between [1-99]"
-                   :placeholder "Enter number of posts"
-                   :value       (or @(rf/subscribe [:get-num-posts]))
-                   :on-change   #(rf/dispatch [:set-num-posts (-> % .-target .-value)])}]
-      [:input.m-2 {:type        "text"
                    :pattern     "^(?!\\s*$).+"
                    :required    true
                    :title       "Enter subreddit"
                    :placeholder "Enter subreddit"
-                   :value       (or @(rf/subscribe [:get-subreddit]))
+                   :value       @(rf/subscribe [:get-subreddit])
                    :on-change   #(rf/dispatch [:set-subreddit (-> % .-target .-value)])}]
+      [:input.m-2 {:type        "text"
+                   :pattern     "^[1-9]{1}\\d?$"
+                   :required    true
+                   :title       "Number between [1-99]"
+                   :placeholder "Enter number of posts"
+                   :value       @(rf/subscribe [:get-num-posts])
+                   :on-change   #(rf/dispatch [:set-num-posts (-> % .-target .-value)])}]
       [:button.btn.btn-secondary
        {:type     "submit"
         :on-click #(let [subreddit @(rf/subscribe [:get-subreddit])
@@ -100,8 +100,8 @@
                                      10
                                      @(rf/subscribe [:get-num-posts]))]
                      (when (and
-                             (not (str/blank? subreddit))
-                             (< 0 num-posts 100))
+                            (not (str/blank? subreddit))
+                            (< 0 num-posts 100))
                        (rf/dispatch [:load-posts subreddit num-posts])
                        (reset-form-fields)))}
        "Search"]]]))
