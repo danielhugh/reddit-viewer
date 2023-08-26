@@ -17,16 +17,17 @@
   {"Posts" :posts
    "Chart" :chart})
 
-(defn sort-posts [title sort-key]
+(defn sort-posts [title current-sort-key sort-key]
   [:button.btn.btn-secondary
-   {:on-click #(rf/dispatch [:sort-posts sort-key])}
+   {:class (when (= current-sort-key sort-key) "active")
+    :on-click #(rf/dispatch [:sort-posts sort-key])}
    (str "sort posts by " title)])
 
-(defn sort-buttons [sort-keys]
+(defn sort-buttons [current-sort-key sort-keys]
   [:div.btn-group
    (for [[title sort-key] sort-keys]
      ^{:key [title sort-key]}
-     [sort-posts title sort-key])])
+     [sort-posts title current-sort-key sort-key])])
 
 (defn display-post [{:keys [permalink subreddit title score url num_comments]}]
   [:div.card.m-2
@@ -139,6 +140,7 @@
 
 (defn home-page []
   (let [view @(rf/subscribe [:view])
+        sort-key @(rf/subscribe [:sort-key])
         posts @(rf/subscribe [:posts])
         subreddits @(rf/subscribe [:subreddit/tabs])]
     (if (nil? posts)
@@ -155,7 +157,7 @@
           (if (empty? posts)
             [no-posts]
             [:div.card>div.card-block
-             [sort-buttons sort-keys]
+             [sort-buttons sort-key sort-keys]
              (case @(rf/subscribe [:view])
                :chart [chart/chart-posts-by-votes]
                :posts [display-posts posts])]))]])))
