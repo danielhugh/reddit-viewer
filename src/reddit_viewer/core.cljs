@@ -7,35 +7,29 @@
    [reddit-viewer.controllers]
    [re-frame.core :as rf]))
 
-(def sort-keys
-  "Map of title to sort-key."
-  {"score"    :score
-   "comments" :num_comments})
-
-(def navbar-items
-  "Map of title to view id"
-  {"Posts" :posts
-   "Chart" :chart})
-
 (defn sort-posts [title current-sort-key sort-key]
   [:button.btn.btn-secondary
    {:class (when (= current-sort-key sort-key) "active")
     :on-click #(rf/dispatch [:sort-posts sort-key])}
    (str "sort posts by " title)])
 
-(defn sort-buttons [current-sort-key sort-keys]
-  [:div.btn-group
-   (for [[title sort-key] sort-keys]
-     ^{:key [title sort-key]}
-     [sort-posts title current-sort-key sort-key])])
+(defn sort-buttons []
+  (let [sort-keys @(rf/subscribe [:app/sort-keys])
+        current-sort-key @(rf/subscribe [:sort-key])]
+    [:div.btn-group.py-3
+     (for [{:keys [title sort-key]} sort-keys]
+       ^{:key sort-key}
+       [sort-posts title current-sort-key sort-key])]))
 
 (defn display-post [{:keys [permalink subreddit title score url num_comments]}]
   [:div.card.m-2
-   [:div.card-block
+   [:div.card-body
     [:h4.card-title
-     [:a {:href (str "http://reddit.com" permalink)} title " "]]
-    [:div [:span.badge.badge-info {:color "info"} subreddit " score " score]]
-    [:div [:span.badge.badge-info {:color "info"} subreddit " comments " num_comments]]
+     [:a {:href (str "http://reddit.com" permalink)} title]]
+    [:div [:span.badge.badge-pill.badge-info
+           (str subreddit " score " score)]]
+    [:div [:span.badge.badge-pill.badge-info
+           (str subreddit " comments " num_comments)]]
     [:img {:width "100%" :src url}]]])
 
 (defn display-posts [posts]
@@ -48,20 +42,6 @@
           ^{:key post}
           [:div.col-4 [display-post post]])])]))
 
-(defn navitem [title view id]
-  [:li.nav-item
-   {:class (when (= id view) "active")}
-   [:a.nav-link
-    {:href     "#"
-     :on-click #(rf/dispatch [:select-view id])}
-    title]])
-
-(defn navbar [view]
-  [:nav.navbar.navbar-toggleable-md.navbar-light.bg-faded.fixed-top
-   [:ul.navbar-nav.mr-auto.nav
-    (for [[title view-id] navbar-items]
-      ^{:key [title view-id]}
-      [navitem title view view-id])]])
 
 (defn loading-spinner []
   [:div.spinner
@@ -73,94 +53,102 @@
   (rf/dispatch [:set-subreddit ""])
   (rf/dispatch [:set-num-posts nil]))
 
-(defn custom-search-bar []
+(defn subreddit-search-bar []
   (r/with-let [_ (reset-form-fields)]
-    [:div {:style {:background-color "#eee"
-                   :border           "1px solid"}}
+    [:div.bg-light.px-3.py-1
      [:h5.m-2 "Search Subreddit"]
-     [:form
-      {:action "#"}
-      [:input.m-2 {:type        "text"
-                   :pattern     "^(?!\\s*$).+"
-                   :required    true
-                   :title       "Enter subreddit"
-                   :placeholder "Enter subreddit"
-                   :value       @(rf/subscribe [:get-subreddit])
-                   :on-change   #(rf/dispatch [:set-subreddit (-> % .-target .-value)])}]
-      [:input.m-2 {:type        "text"
-                   :pattern     "^[1-9]{1}\\d?$"
-                   :required    true
-                   :title       "Number between [1-99]"
-                   :placeholder "Enter number of posts"
-                   :value       @(rf/subscribe [:get-num-posts])
-                   :on-change   #(rf/dispatch [:set-num-posts (-> % .-target .-value)])}]
-      [:button.btn.btn-secondary
-       {:type     "submit"
-        :on-click #(let [subreddit @(rf/subscribe [:get-subreddit])
-                         num-posts (if (str/blank? @(rf/subscribe [:get-num-posts]))
-                                     10
-                                     @(rf/subscribe [:get-num-posts]))]
-                     (when (and
-                            (not (str/blank? subreddit))
-                            (< 0 num-posts 100))
-                       (rf/dispatch [:load-posts subreddit num-posts])
-                       (reset-form-fields)))}
-       "Search"]]]))
-
-(defn no-posts []
-  [:div.pt-2 "No posts to show! :("])
-
-(defn no-tabs []
-  [:div.pt-2 "Please search for a subreddit :)"])
-
-(defn close-tab-button [id]
-  [:span.pl-2.close
-   {:on-click #(rf/dispatch [:subreddit/remove-subreddit-tab id])}
-   "\u00D7"])
+     [:form {:on-submit #(.preventDefault %)}
+      [:div.row.align-items-center
+       [:div.col-auto
+        [:input.m-2.form-control {:type        "text"
+                                  :pattern     "^(?!\\s*$).+"
+                                  :required    true
+                                  :title       "Enter subreddit"
+                                  :placeholder "Enter subreddit"
+                                  :value       @(rf/subscribe [:get-subreddit])
+                                  :on-change   #(rf/dispatch [:set-subreddit (-> % .-target .-value)])}]]
+       [:div.col-auto
+        [:input.m-2.form-control {:type        "text"
+                                  :pattern     "^[1-9]{1}\\d?$"
+                                  :required    true
+                                  :title       "Number between [1-99]"
+                                  :placeholder "Enter number of posts"
+                                  :value       @(rf/subscribe [:get-num-posts])
+                                  :on-change   #(rf/dispatch [:set-num-posts (-> % .-target .-value)])}]]
+       [:div.col-auto
+        [:button.btn.btn-primary
+         {:type     "submit"
+          :on-click #(let [subreddit @(rf/subscribe [:get-subreddit])
+                           num-posts (if (str/blank? @(rf/subscribe [:get-num-posts]))
+                                       10
+                                       @(rf/subscribe [:get-num-posts]))]
+                       (when (and
+                              (not (str/blank? subreddit))
+                              (< 0 num-posts 100))
+                         (rf/dispatch [:load-posts subreddit num-posts])
+                         (reset-form-fields)))}
+         "Search"]]]]]))
 
 (defn subreddit-tab [title view id]
   [:li.nav-item
-   {:style {:display "flex"
-            :flex-direction "row"}}
    [:a.nav-link
-    {:href     "#"
-     :class    (when (= id view) "active")
-     :on-click #(if (= "A" (-> % .-target .-nodeName))
-                  (rf/dispatch [:subreddit/swap-view id title]))}
+    {:href "#"
+     :class (when (= id view) "active")
+     :on-click #(rf/dispatch [:subreddit/swap-view id title])}
     title
-    [close-tab-button id]]])
+    [:span.pl-2.close
+     {:on-click #(rf/dispatch [:subreddit/remove-subreddit-tab id])}
+     "\u00D7"]]])
 
-(defn subreddit-tabs [subreddits]
-  (let [view @(rf/subscribe [:subreddit/view])]
+(defn subreddit-tabs []
+  (let [view @(rf/subscribe [:subreddit/view])
+        subreddits @(rf/subscribe [:subreddit/tabs])]
     [:ul.nav.nav-tabs.flex-sm-row.pt-2
      {:style {:flex-wrap "wrap"}}
-     (for [{id :id title :title :as subreddit} subreddits]
-       ^{:key subreddit}
+     (for [{:keys [id title]} subreddits]
+       ^{:key id}
        [subreddit-tab title view id])]))
 
-(defn home-page []
+(defn subreddit-content []
   (let [view @(rf/subscribe [:view])
-        sort-key @(rf/subscribe [:sort-key])
-        posts @(rf/subscribe [:posts])
         subreddits @(rf/subscribe [:subreddit/tabs])]
-    (if (nil? posts)
-      [loading-spinner]
+    (if (empty? subreddits)
+      [:div.pt-2 "Please search for a subreddit :)"]
       [:div
-       [navbar view]
-       [:div.container
-        {:style {:width       "100%"
-                 :padding-top "57px"}}
-        [custom-search-bar]
-        [subreddit-tabs subreddits]
-        (if (empty? subreddits)
-          [no-tabs]
+       [sort-buttons]
+       [:div.card>div.card-block
+        (let [posts @(rf/subscribe [:posts])]
           (if (empty? posts)
-            [no-posts]
-            [:div.card>div.card-block
-             [sort-buttons sort-key sort-keys]
-             (case @(rf/subscribe [:view])
-               :chart [chart/chart-posts-by-votes]
-               :posts [display-posts posts])]))]])))
+            [:div.pt-2 "No posts to show :("]
+            (case view
+              :chart [chart/chart-posts-by-votes]
+              :posts [display-posts posts])))]])))
+
+(defn navitem [title current-view-id view-id]
+  [:li.nav-item
+   [:a.nav-link
+    {:href "#"
+     :class (when (= view-id current-view-id) "active")
+     :on-click #(rf/dispatch [:select-view view-id])}
+    title]])
+
+(defn navbar []
+  (let [current-view-id @(rf/subscribe [:view])
+        navbar-items @(rf/subscribe [:app/navbar-items])]
+    [:nav.navbar.navbar-light.bg-light.sticky-top.navbar-expand-md
+     [:ul.navbar-nav.mr-auto.nav
+      (for [{:keys [title view-id]} navbar-items]
+        ^{:key view-id}
+        [navitem title current-view-id view-id])]]))
+
+(defn home-page []
+  [:div
+   [navbar]
+   [:div.w-100
+    [subreddit-search-bar]
+    [:div.container
+     [subreddit-tabs]
+     [subreddit-content]]]])
 
 ;; -------------------------
 ;; Initialize app

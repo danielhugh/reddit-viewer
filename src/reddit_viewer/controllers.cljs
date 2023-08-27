@@ -7,7 +7,15 @@
 (rf/reg-event-db
  :initialize-db
  (fn [_ _]
-   {:view           :posts
+   {:app/sort-keys [{:sort-key :score
+                     :title "score"}
+                    {:sort-key :num_comments
+                     :title "comments"}]
+    :app/navbar-items [{:view-id :posts
+                        :title "Posts"}
+                       {:view-id :chart
+                        :title "Chart"}]
+    :view           :posts
     :sort-key       :score
     :subreddit/tabs []}))
 
@@ -75,6 +83,16 @@
  :view
  (fn [db _]
    (:view db)))
+
+(rf/reg-sub
+ :app/navbar-items
+ (fn [db _]
+   (:app/navbar-items db)))
+
+(rf/reg-sub
+ :app/sort-keys
+ (fn [db _]
+   (:app/sort-keys db)))
 
 (rf/reg-sub
  :sort-key

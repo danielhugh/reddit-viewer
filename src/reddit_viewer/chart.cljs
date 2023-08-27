@@ -34,7 +34,7 @@
 (defn chart-posts-by-votes []
   (let [chart (atom nil)]
     (r/create-class
-      {:component-did-mount    (render-chart chart)
-       :component-did-update   (render-chart chart)
-       :component-will-unmount (fn [_] (destroy-chart chart))
-       :render                 render-canvas})))
+     {:component-did-mount    (render-chart chart)
+      :component-did-update   (render-chart chart)
+      :component-will-unmount (fn [_] (destroy-chart chart))
+      :render                 render-canvas})))
