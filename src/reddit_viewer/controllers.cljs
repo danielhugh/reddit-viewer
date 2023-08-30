@@ -46,7 +46,7 @@
        :error-handler   #(js/alert "Unexpected error!")
        :response-format :json
        :keywords?       true}
-      (if error-handler
+      (when error-handler
         {:error-handler error-handler})))))
 
 (rf/reg-event-fx
@@ -135,7 +135,7 @@
          {new-id :id new-subreddit :title} (get tabs replacement-index)
          reddit-url (utils/generate-reddit-url new-subreddit 10)
          evict-current? (= evict-id view)]
-     (merge (if (and evict-current? (> (count tabs) 1))
+     (merge (when (and evict-current? (> (count tabs) 1))
               {:ajax-get [reddit-url #(rf/dispatch [:set-posts %])]})
             {:db (-> db
                      (cond->

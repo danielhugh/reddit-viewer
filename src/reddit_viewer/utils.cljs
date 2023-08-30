@@ -6,14 +6,14 @@
 
 (defn generate-uuid [id]
   (str/keyword
-    (str (str/lower id) "-" (random-uuid))))
+   (str (str/lower id) "-" (random-uuid))))
 
 (defn get-evict-tab-index [tabs evict-id]
   (first (keep-indexed
-           (fn [index {id :id}]
-             (if (= id evict-id)
-               index))
-           tabs)))
+          (fn [index {id :id}]
+            (when (= id evict-id)
+              index))
+          tabs)))
 
 (defn remove-by-index [vector index]
   (into [] (concat (subvec vector 0 index)
