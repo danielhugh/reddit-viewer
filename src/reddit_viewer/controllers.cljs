@@ -17,7 +17,8 @@
                         :title "Chart"}]
     :view           :posts
     :sort-key       :score
-    :subreddit/tabs []}))
+    :subreddit/tabs []
+    :subreddit/loading-posts? true}))
 
 (defn find-posts-with-preview [posts]
   (filter #(= (:post_hint %) "image") posts))
@@ -60,12 +61,17 @@
  (fn [{db :db} [_ subreddit num-posts]]
    (let [id (utils/generate-uuid subreddit)
          reddit-url (utils/generate-reddit-url subreddit num-posts)]
-     {:db       (assoc db :subreddit/view id)
-      :ajax-get [reddit-url
-                 #(when %
-                    (rf/dispatch [:subreddit/add-subreddit-tab id subreddit])
-                    (rf/dispatch [:set-posts %]))
-                 #(js/alert "No subreddit found.")]})))
+     {:db (assoc db :subreddit/view id
+                 :subreddit/loading-posts? true)
+      :fx [[:ajax-get [reddit-url #(when %
+                                     (rf/dispatch [:subreddit/add-subreddit-tab id subreddit])
+                                     (rf/dispatch [:set-posts %])
+                                     (rf/dispatch [:subreddit/set-loading-status false]))]]]})))
+
+(rf/reg-event-db
+ :subreddit/set-loading-status
+ (fn [db [_ status]]
+   (assoc db :subreddit/loading-posts? status)))
 
 (rf/reg-event-db
  :sort-posts
@@ -113,6 +119,11 @@
  :subreddit/tabs
  (fn [db _]
    (:subreddit/tabs db)))
+
+(rf/reg-sub
+ :subreddit/loading-posts?
+ (fn [db _]
+   (:subreddit/loading-posts? db)))
 
 (rf/reg-event-fx
  :subreddit/remove-subreddit-tab

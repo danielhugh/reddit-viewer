@@ -144,7 +144,9 @@
     [subreddit-search-bar]
     [:div.container
      [subreddit-tabs]
-     [subreddit-content]]]])
+     (if @(rf/subscribe [:subreddit/loading-posts?])
+       [loading-spinner]
+       [subreddit-content])]]])
 
 ;; -------------------------
 ;; Initialize app
