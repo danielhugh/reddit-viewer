@@ -49,12 +49,11 @@
    [:div.bounce2]
    [:div.bounce3]])
 
-(defn reset-form-fields []
-  (rf/dispatch [:set-subreddit ""])
-  (rf/dispatch [:set-num-posts nil]))
-
 (defn subreddit-search-bar []
-  (r/with-let [_ (reset-form-fields)]
+  (r/with-let [draft (r/atom {})
+               valid-form? (fn [s]
+                             (and (not (str/blank? (:subreddit s)))
+                                  (< 0 (:num-posts s) 100)))]
     [:div.bg-light.px-3.py-1
      [:h5.m-2 "Search Subreddit"]
      [:form {:on-submit #(.preventDefault %)}
@@ -65,28 +64,25 @@
                                   :required    true
                                   :title       "Enter subreddit"
                                   :placeholder "Enter subreddit"
-                                  :value       @(rf/subscribe [:get-subreddit])
-                                  :on-change   #(rf/dispatch [:set-subreddit (-> % .-target .-value)])}]]
+                                  :value       (or (:subreddit @draft) "")
+                                  :on-change   (fn [e]
+                                                 (swap! draft assoc :subreddit (-> e .-target .-value)))}]]
        [:div.col-auto
-        [:input.m-2.form-control {:type        "text"
+        [:input.m-2.form-control {:type        "number"
                                   :pattern     "^[1-9]{1}\\d?$"
                                   :required    true
                                   :title       "Number between [1-99]"
                                   :placeholder "Enter number of posts"
-                                  :value       @(rf/subscribe [:get-num-posts])
-                                  :on-change   #(rf/dispatch [:set-num-posts (-> % .-target .-value)])}]]
+                                  :value       (or (:num-posts @draft) "")
+                                  :on-change   (fn [e]
+                                                 (swap! draft assoc :num-posts (-> e .-target .-value)))}]]
        [:div.col-auto
         [:button.btn.btn-primary
          {:type     "submit"
-          :on-click #(let [subreddit @(rf/subscribe [:get-subreddit])
-                           num-posts (if (str/blank? @(rf/subscribe [:get-num-posts]))
-                                       10
-                                       @(rf/subscribe [:get-num-posts]))]
-                       (when (and
-                              (not (str/blank? subreddit))
-                              (< 0 num-posts 100))
-                         (rf/dispatch [:load-posts subreddit num-posts])
-                         (reset-form-fields)))}
+          :disabled (not (valid-form? @draft))
+          :on-click #(do
+                       (rf/dispatch [:load-posts (:subreddit @draft) (:num-posts @draft)])
+                       (reset! draft {}))}
          "Search"]]]]]))
 
 (defn subreddit-tab [title view id]

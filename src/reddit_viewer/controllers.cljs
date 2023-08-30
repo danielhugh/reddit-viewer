@@ -104,26 +104,6 @@
  (fn [db _]
    (:posts db)))
 
-(rf/reg-event-db
- :set-num-posts
- (fn [db [_ num]]
-   (assoc db :num-posts num)))
-
-(rf/reg-sub
- :get-num-posts
- (fn [db _]
-   (get db :num-posts)))
-
-(rf/reg-event-db
- :set-subreddit
- (fn [db [_ subreddit]]
-   (assoc db :subreddit subreddit)))
-
-(rf/reg-sub
- :get-subreddit
- (fn [db _]
-   (get db :subreddit)))
-
 (rf/reg-sub
  :subreddit/view
  (fn [db _]
