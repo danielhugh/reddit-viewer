@@ -23,13 +23,19 @@
 (defn find-posts-with-preview [posts]
   (filter #(= (:post_hint %) "image") posts))
 
+(defn select-interesting-post-keys [posts]
+  (map (fn [post]
+         (select-keys post [:score :num_comments :id :title :permalink :url]))
+       posts))
+
 (rf/reg-event-db
  :set-posts
  (fn [db [_ posts]]
    (assoc db :posts
           (->> (get-in posts [:data :children])
                (map :data)
-               (find-posts-with-preview)))))
+               (find-posts-with-preview)
+               (select-interesting-post-keys)))))
 
 (rf/reg-event-db
  :subreddit/add-subreddit-tab
