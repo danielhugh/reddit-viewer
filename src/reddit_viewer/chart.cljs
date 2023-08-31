@@ -1,9 +1,9 @@
 (ns reddit-viewer.chart
   (:require
    ["chart.js" :as chart]
-   [reagent.core :as r]
-   [reagent.dom :as rdom]
-   [re-frame.core :as rf]))
+   ["react" :as react]
+   [re-frame.core :as rf]
+   [reagent.core :as r]))
 
 (defn render-data [node data]
   (chart.
@@ -22,19 +22,33 @@
     (.destroy @chart)
     (reset! chart nil)))
 
-(defn render-chart [chart]
+(defn render-chart [chart ref]
   (fn [component]
-    (when-let [posts @(rf/subscribe [:posts])]
-      (destroy-chart chart)
-      (reset! chart (render-data (rdom/dom-node component) posts)))))
+    (let [[_ posts] (r/argv component)]
+      (when posts
+        (destroy-chart chart)
+        (reset! chart (render-data (.-current ref) posts))))))
 
-(defn render-canvas []
-  (when @(rf/subscribe [:posts]) [:canvas]))
+(defn chart-posts-by-votes-inner [_posts]
+  (let [chart (atom nil)
+        ref (react/createRef)]
+    (r/create-class
+     {:display-name "chart-posts-by-votes-inner"
+
+      :reagent-render
+      (fn [_posts]
+        [:canvas {:ref ref}])
+
+      :component-did-mount
+      (render-chart chart ref)
+
+      :component-did-update
+      (render-chart chart ref)
+
+      :component-will-unmount
+      (fn [_component]
+        (destroy-chart chart))})))
 
 (defn chart-posts-by-votes []
-  (let [chart (atom nil)]
-    (r/create-class
-     {:component-did-mount    (render-chart chart)
-      :component-did-update   (render-chart chart)
-      :component-will-unmount (fn [_] (destroy-chart chart))
-      :render                 render-canvas})))
+  (let [posts @(rf/subscribe [:posts])]
+    [chart-posts-by-votes-inner posts]))
