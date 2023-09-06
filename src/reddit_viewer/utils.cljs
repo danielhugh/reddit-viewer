@@ -4,9 +4,8 @@
 (defn generate-reddit-url [subreddit num-posts]
   (str "https://www.reddit.com/r/" subreddit ".json?sort=new&limit=" num-posts))
 
-(defn generate-uuid [id]
-  (str/keyword
-   (str (str/lower id) "-" (random-uuid))))
+(defn generate-uuid []
+  (str/keyword (str (random-uuid))))
 
 (defn get-evict-tab-index [tabs evict-id]
   (first (keep-indexed

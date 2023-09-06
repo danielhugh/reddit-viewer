@@ -64,13 +64,14 @@
 
 (rf/reg-event-fx
  :load-posts
- (fn [{db :db} [_ subreddit num-posts]]
-   (let [id (utils/generate-uuid subreddit)
+ [(rf/inject-cofx :uuid)]
+ (fn [{:keys [db uuid]} [_ subreddit num-posts]]
+   (let [subreddit-id uuid
          reddit-url (utils/generate-reddit-url subreddit num-posts)]
-     {:db (assoc db :subreddit/view id
+     {:db (assoc db :subreddit/view subreddit-id
                  :subreddit/loading-posts? true)
       :fx [[:ajax-get [reddit-url #(when %
-                                     (rf/dispatch [:subreddit/add-subreddit-tab id subreddit])
+                                     (rf/dispatch [:subreddit/add-subreddit-tab subreddit-id subreddit])
                                      (rf/dispatch [:set-posts %])
                                      (rf/dispatch [:subreddit/set-loading-status false]))]]]})))
 
@@ -150,3 +151,10 @@
                                           (assoc :posts [])
                                           (assoc :subreddit/view nil)))
                      (update :subreddit/tabs utils/remove-by-index evict-index))}))))
+
+;; Co-effects
+
+(rf/reg-cofx
+ :uuid
+ (fn [coeffects _]
+   (assoc coeffects :uuid (utils/generate-uuid))))
