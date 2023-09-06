@@ -1,11 +1,12 @@
 (ns reddit-viewer.core
   (:require
    [cuerdas.core :as str]
+   [re-frame.core :as rf]
    [reagent.core :as r]
    [reagent.dom :as rdom]
    [reddit-viewer.chart :as chart]
    [reddit-viewer.controllers]
-   [re-frame.core :as rf]))
+   [reddit-viewer.subs]))
 
 (defn sort-posts [title current-sort-key sort-key]
   [:button.btn.btn-secondary
