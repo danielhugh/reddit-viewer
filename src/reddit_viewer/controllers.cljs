@@ -1,24 +1,14 @@
 (ns reddit-viewer.controllers
   (:require
    [ajax.core :as ajax]
+   [reddit-viewer.db :as db]
    [reddit-viewer.utils :as utils]
    [re-frame.core :as rf]))
 
 (rf/reg-event-db
  :initialize-db
  (fn [_ _]
-   {:app/sort-keys [{:sort-key :score
-                     :title "score"}
-                    {:sort-key :num_comments
-                     :title "comments"}]
-    :app/navbar-items [{:view-id :posts
-                        :title "Posts"}
-                       {:view-id :chart
-                        :title "Chart"}]
-    :view           :posts
-    :sort-key       :score
-    :subreddit/tabs []
-    :subreddit/loading-posts? true}))
+   db/initial-db))
 
 (defn find-posts-with-preview [posts]
   (filter #(= (:post_hint %) "image") posts))
