@@ -4,7 +4,7 @@
 To start developing navigate to the project folder and run the following command in the terminal:
 
 ```
-npx shadow-cljs watch app
+npm run dev
 ```
 
 Browser to http://localhost:8080 to view the running app.
@@ -18,5 +18,5 @@ The project is setup to start nREPL on port `7002`.
 Create the release build:
 
 ```
-npx shadow-cljs release app
+npm run release
 ```

@@ -1,5 +1,9 @@
 {
   "name": "reddit-viewer",
+  "scripts": {
+    "dev": "shadow-cljs -d cider/cider-nrepl:0.28.5 watch app",
+    "release": "shadow-cljs release app"
+  },
   "dependencies": {
     "chart.js": "^2.9.4",
     "highlight.js": "11.1.0",
