@@ -18,10 +18,14 @@
 (def app-db-schema
   [:map
    [:app/sort-keys [:map-of
-                    :keyword [:map [:title non-empty-string]]]]
+                    :keyword [:map
+                              [:id keyword?]
+                              [:title non-empty-string]]]]
    [:app/sort-keys-list [:vector :keyword #_[:enum :score :num_comments]]]
    [:app/navbar-items [:map-of
-                       :keyword [:map [:title non-empty-string]]]]
+                       :keyword [:map
+                                 [:id keyword?]
+                                 [:title non-empty-string]]]]
    [:app/navbar-items-list [:vector :keyword #_[:enum :posts :chart]]]
    [:view [:enum :posts :chart]]
    [:sort-key [:enum :score :num_comments]]
@@ -40,11 +44,15 @@
              [:url string?]]]]])
 
 (def initial-db
-  {:app/sort-keys {:score {:title "score"}
-                   :num_comments {:title "comments"}}
+  {:app/sort-keys {:score {:id :score
+                           :title "score"}
+                   :num_comments {:id :num_comments
+                                  :title "comments"}}
    :app/sort-keys-list [:score :num_comments]
-   :app/navbar-items {:posts {:title "Posts"}
-                      :chart {:title "Chart"}}
+   :app/navbar-items {:posts {:id :posts
+                              :title "Posts"}
+                      :chart {:id :chart
+                              :title "Chart"}}
    :app/navbar-items-list [:posts :chart]
    :view :posts
    :sort-key :score

@@ -8,10 +8,10 @@
    [reddit-viewer.controllers]
    [reddit-viewer.subs]))
 
-(defn sort-posts [title current-sort-key sort-key-id]
+(defn sort-posts [{:keys [title id] :as _sort-posts-info} current-id]
   [:button.btn.btn-secondary
-   {:class (when (= current-sort-key sort-key-id) "active")
-    :on-click #(rf/dispatch [:sort-posts sort-key-id])}
+   {:class (when (= id current-id) "active")
+    :on-click #(rf/dispatch [:sort-posts id])}
    (str "sort posts by " title)])
 
 (defn sort-buttons []
@@ -20,9 +20,9 @@
         current-sort-key @(rf/subscribe [:sort-key])]
     [:div.btn-group.py-3
      (for [sort-key-id sort-keys-list]
-       (let [{:keys [title]} (get sort-keys sort-key-id)]
+       (let [sort-key-info (get sort-keys sort-key-id)]
          ^{:key sort-key-id}
-         [sort-posts title current-sort-key sort-key-id]))]))
+         [sort-posts sort-key-info current-sort-key]))]))
 
 (defn display-post [{:keys [permalink subreddit title score url num_comments]}]
   [:div.card.m-2
@@ -123,12 +123,12 @@
               :chart [chart/chart-posts-by-votes]
               :posts [display-posts posts])))]])))
 
-(defn navitem [title current-view-id view-id]
+(defn navitem [{:keys [title id] :as _navitem-info} current-id]
   [:li.nav-item
    [:a.nav-link
     {:href "#"
-     :class (when (= view-id current-view-id) "active")
-     :on-click #(rf/dispatch [:select-view view-id])}
+     :class (when (= id current-id) "active")
+     :on-click #(rf/dispatch [:select-view id])}
     title]])
 
 (defn navbar []
@@ -137,10 +137,10 @@
         navbar-items-list @(rf/subscribe [:app/navbar-items-list])]
     [:nav.navbar.navbar-light.bg-light.sticky-top.navbar-expand-md
      [:ul.navbar-nav.mr-auto.nav
-      (for [navbar-item-id navbar-items-list #_#_{:keys [title view-id]} navbar-items]
-        (let [{:keys [title]} (get navbar-items navbar-item-id)]
+      (for [navbar-item-id navbar-items-list]
+        (let [navitem-info (get navbar-items navbar-item-id)]
           ^{:key navbar-item-id}
-          [navitem title current-view-id navbar-item-id]))]]))
+          [navitem navitem-info current-view-id]))]]))
 
 (defn home-page []
   [:div
