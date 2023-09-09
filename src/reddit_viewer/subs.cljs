@@ -13,9 +13,19 @@
    (:app/navbar-items db)))
 
 (rf/reg-sub
+ :app/navbar-items-list
+ (fn [db _]
+   (:app/navbar-items-list db)))
+
+(rf/reg-sub
  :app/sort-keys
  (fn [db _]
    (:app/sort-keys db)))
+
+(rf/reg-sub
+ :app/sort-keys-list
+ (fn [db _]
+   (:app/sort-keys-list db)))
 
 (rf/reg-sub
  :sort-key

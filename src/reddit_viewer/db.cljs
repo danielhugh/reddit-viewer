@@ -9,17 +9,20 @@
 (def non-empty-string
   (m/schema [:string {:min 1}]))
 
+(comment
+
+  :rcf)
+
 ;; Schema
 
 (def app-db-schema
   [:map
-   [:app/sort-keys [:vector
-                    [:map
-                     [:sort-key [:enum :score :num_comments]]
-                     [:title non-empty-string]]]]
-   [:app/navbar-items [:vector [:map
-                                [:view-id [:enum :posts :chart]]
-                                [:title non-empty-string]]]]
+   [:app/sort-keys [:map-of
+                    :keyword [:map [:title non-empty-string]]]]
+   [:app/sort-keys-list [:vector :keyword #_[:enum :score :num_comments]]]
+   [:app/navbar-items [:map-of
+                       :keyword [:map [:title non-empty-string]]]]
+   [:app/navbar-items-list [:vector :keyword #_[:enum :posts :chart]]]
    [:view [:enum :posts :chart]]
    [:sort-key [:enum :score :num_comments]]
    [:subreddit/tabs [:vector [:map
@@ -37,14 +40,12 @@
              [:url string?]]]]])
 
 (def initial-db
-  {:app/sort-keys [{:sort-key :score
-                    :title "score"}
-                   {:sort-key :num_comments
-                    :title "comments"}]
-   :app/navbar-items [{:view-id :posts
-                       :title "Posts"}
-                      {:view-id :chart
-                       :title "Chart"}]
+  {:app/sort-keys {:score {:title "score"}
+                   :num_comments {:title "comments"}}
+   :app/sort-keys-list [:score :num_comments]
+   :app/navbar-items {:posts {:title "Posts"}
+                      :chart {:title "Chart"}}
+   :app/navbar-items-list [:posts :chart]
    :view :posts
    :sort-key :score
    :subreddit/tabs []

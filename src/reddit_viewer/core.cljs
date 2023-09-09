@@ -8,19 +8,21 @@
    [reddit-viewer.controllers]
    [reddit-viewer.subs]))
 
-(defn sort-posts [title current-sort-key sort-key]
+(defn sort-posts [title current-sort-key sort-key-id]
   [:button.btn.btn-secondary
-   {:class (when (= current-sort-key sort-key) "active")
-    :on-click #(rf/dispatch [:sort-posts sort-key])}
+   {:class (when (= current-sort-key sort-key-id) "active")
+    :on-click #(rf/dispatch [:sort-posts sort-key-id])}
    (str "sort posts by " title)])
 
 (defn sort-buttons []
   (let [sort-keys @(rf/subscribe [:app/sort-keys])
+        sort-keys-list @(rf/subscribe [:app/sort-keys-list])
         current-sort-key @(rf/subscribe [:sort-key])]
     [:div.btn-group.py-3
-     (for [{:keys [title sort-key]} sort-keys]
-       ^{:key sort-key}
-       [sort-posts title current-sort-key sort-key])]))
+     (for [sort-key-id sort-keys-list]
+       (let [{:keys [title]} (get sort-keys sort-key-id)]
+         ^{:key sort-key-id}
+         [sort-posts title current-sort-key sort-key-id]))]))
 
 (defn display-post [{:keys [permalink subreddit title score url num_comments]}]
   [:div.card.m-2
@@ -131,12 +133,14 @@
 
 (defn navbar []
   (let [current-view-id @(rf/subscribe [:view])
-        navbar-items @(rf/subscribe [:app/navbar-items])]
+        navbar-items @(rf/subscribe [:app/navbar-items])
+        navbar-items-list @(rf/subscribe [:app/navbar-items-list])]
     [:nav.navbar.navbar-light.bg-light.sticky-top.navbar-expand-md
      [:ul.navbar-nav.mr-auto.nav
-      (for [{:keys [title view-id]} navbar-items]
-        ^{:key view-id}
-        [navitem title current-view-id view-id])]]))
+      (for [navbar-item-id navbar-items-list #_#_{:keys [title view-id]} navbar-items]
+        (let [{:keys [title]} (get navbar-items navbar-item-id)]
+          ^{:key navbar-item-id}
+          [navitem title current-view-id navbar-item-id]))]]))
 
 (defn home-page []
   [:div
