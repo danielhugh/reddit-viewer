@@ -15,9 +15,9 @@
   (filter #(= (:post_hint %) "image") posts))
 
 (defn select-interesting-post-keys [posts]
-  (map (fn [post]
-         (select-keys post [:score :num_comments :id :title :permalink :url]))
-       posts))
+  (mapv (fn [post]
+          (select-keys post [:score :num_comments :id :title :permalink :url]))
+        posts))
 
 (rf/reg-event-db
  :set-posts

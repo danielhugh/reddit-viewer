@@ -34,7 +34,7 @@
                               [:title non-empty-string]]]]
    [:subreddit/loading-posts? boolean?]
    [:subreddit/view {:optional true} keyword?]
-   [:posts [:sequential
+   [:posts [:vector
             [:map
              [:score int?]
              [:num_comments int?]
