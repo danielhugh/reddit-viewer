@@ -1,6 +1,8 @@
 (ns reddit-viewer.db
   (:require [malli.core :as m]
-            [malli.error :as me]))
+            [malli.error :as me]
+            [reddit-viewer.utils :as u]
+            [re-frame.core :as rf]))
 
 ;; Helpers
 
@@ -24,7 +26,7 @@
                               [:id keyword?]
                               [:title non-empty-string]]]]
    [:subreddit/loading-posts? boolean?]
-   [:subreddit/view keyword?]
+   [:subreddit/view {:optional true} keyword?]
    [:posts [:sequential
             [:map
              [:score int?]
@@ -46,12 +48,23 @@
    :view :posts
    :sort-key :score
    :subreddit/tabs []
-   :subreddit/loading-posts? true})
+   :subreddit/loading-posts? true
+   :posts []})
 
+(def app-db-explainer
+  (-> app-db-schema m/explainer))
 
-(comment
-  (require '[re-frame.db :as rfdb])
-  (-> (m/explain app-db-schema @re-frame.db/app-db)
-      (me/humanize))
+(defn valid-schema? [db]
+  (when-let [error (-> db app-db-explainer me/humanize)]
+    (throw
+     (ex-info (str "Invalid schema.")
+              {}
+              error))))
 
-  :rcf)
+(def validate-schema (rf/after valid-schema?))
+
+;; Interceptors
+
+(def standard-interceptors
+  [(when u/debug? rf/debug)
+   (when u/debug? validate-schema)])

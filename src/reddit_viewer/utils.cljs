@@ -1,6 +1,8 @@
 (ns reddit-viewer.utils
   (:require [cuerdas.core :as str]))
 
+(def debug? ^boolean goog.DEBUG)
+
 (defn generate-reddit-url [subreddit num-posts]
   (str "https://www.reddit.com/r/" subreddit ".json?sort=new&limit=" num-posts))
 

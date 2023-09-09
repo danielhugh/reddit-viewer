@@ -7,6 +7,7 @@
 
 (rf/reg-event-db
  :initialize-db
+ [db/standard-interceptors]
  (fn [_ _]
    db/initial-db))
 
@@ -20,6 +21,7 @@
 
 (rf/reg-event-db
  :set-posts
+ [db/standard-interceptors]
  (fn [db [_ posts]]
    (assoc db :posts
           (->> (get-in posts [:data :children])
@@ -29,6 +31,7 @@
 
 (rf/reg-event-db
  :subreddit/add-subreddit-tab
+ [db/standard-interceptors]
  (fn [db [_ id subreddit]]
    (update db :subreddit/tabs conj {:id    id
                                     :title subreddit})))
@@ -47,6 +50,7 @@
 
 (rf/reg-event-fx
  :subreddit/swap-view
+ [db/standard-interceptors]
  (fn [{db :db} [_ id subreddit]]
    (let [reddit-url (utils/generate-reddit-url subreddit 10)]
      {:db       (assoc db :subreddit/view id)
@@ -54,7 +58,7 @@
 
 (rf/reg-event-fx
  :load-posts
- [(rf/inject-cofx :uuid)]
+ [db/standard-interceptors (rf/inject-cofx :uuid)]
  (fn [{:keys [db uuid]} [_ subreddit num-posts]]
    (let [subreddit-id uuid
          reddit-url (utils/generate-reddit-url subreddit num-posts)]
@@ -67,11 +71,13 @@
 
 (rf/reg-event-db
  :subreddit/set-loading-status
+ [db/standard-interceptors]
  (fn [db [_ status]]
    (assoc db :subreddit/loading-posts? status)))
 
 (rf/reg-event-db
  :sort-posts
+ [db/standard-interceptors]
  (fn [db [_ sort-key]]
    (-> db
        (assoc :sort-key sort-key)
@@ -79,11 +85,13 @@
 
 (rf/reg-event-db
  :select-view
+ [db/standard-interceptors]
  (fn [db [_ view]]
    (assoc db :view view)))
 
 (rf/reg-event-fx
  :subreddit/remove-subreddit-tab
+ [db/standard-interceptors]
  (fn [{db :db} [_ evict-id]]
    (let [tabs (:subreddit/tabs db)
          view (:subreddit/view db)
