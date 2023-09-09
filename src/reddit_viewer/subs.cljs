@@ -3,9 +3,9 @@
    [re-frame.core :as rf]))
 
 (rf/reg-sub
- :view
+ :app/view
  (fn [db _]
-   (:view db)))
+   (:app/view db)))
 
 (rf/reg-sub
  :app/navbar-items

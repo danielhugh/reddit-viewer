@@ -87,7 +87,7 @@
  :select-view
  [db/standard-interceptors]
  (fn [db [_ view]]
-   (assoc db :view view)))
+   (assoc db :app/view view)))
 
 (rf/reg-event-fx
  :subreddit/remove-subreddit-tab

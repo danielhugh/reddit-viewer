@@ -109,7 +109,7 @@
        [subreddit-tab title view id])]))
 
 (defn subreddit-content []
-  (let [view @(rf/subscribe [:view])
+  (let [view @(rf/subscribe [:app/view])
         subreddits @(rf/subscribe [:subreddit/tabs])]
     (if (empty? subreddits)
       [:div.pt-2 "Please search for a subreddit :)"]
@@ -132,7 +132,7 @@
     title]])
 
 (defn navbar []
-  (let [current-view-id @(rf/subscribe [:view])
+  (let [current-view-id @(rf/subscribe [:app/view])
         navbar-items @(rf/subscribe [:app/navbar-items])
         navbar-items-list @(rf/subscribe [:app/navbar-items-list])]
     [:nav.navbar.navbar-light.bg-light.sticky-top.navbar-expand-md

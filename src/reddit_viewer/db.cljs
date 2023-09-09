@@ -27,7 +27,7 @@
                                  [:id keyword?]
                                  [:title non-empty-string]]]]
    [:app/navbar-items-list [:vector :keyword #_[:enum :posts :chart]]]
-   [:view [:enum :posts :chart]]
+   [:app/view [:enum :posts :chart]]
    [:sort-key [:enum :score :num_comments]]
    [:subreddit/tabs [:vector [:map
                               [:id keyword?]
@@ -54,7 +54,7 @@
                       :chart {:id :chart
                               :title "Chart"}}
    :app/navbar-items-list [:posts :chart]
-   :view :posts
+   :app/view :posts
    :sort-key :score
    :subreddit/tabs []
    :subreddit/loading-posts? true
