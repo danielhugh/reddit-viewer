@@ -9,6 +9,14 @@
 (def non-empty-string
   (m/schema [:string {:min 1}]))
 
+(def distinct-sequence
+  (m/schema [:and
+             [:sequential any?]
+             [:fn {:error/message "all elements should be distinct"}
+              (fn [xs]
+                (or (empty? xs)
+                    (apply distinct? xs)))]]))
+
 (comment
 
   :rcf)
@@ -21,12 +29,16 @@
                     :keyword [:map
                               [:id keyword?]
                               [:title non-empty-string]]]]
-   [:app/sort-keys-list [:vector :keyword #_[:enum :score :num_comments]]]
+   [:app/sort-keys-list [:and
+                         [:vector :keyword]
+                         distinct-sequence]]
    [:app/navbar-items [:map-of
                        :keyword [:map
                                  [:id keyword?]
                                  [:title non-empty-string]]]]
-   [:app/navbar-items-list [:vector :keyword #_[:enum :posts :chart]]]
+   [:app/navbar-items-list [:and
+                            [:vector :keyword]
+                            distinct-sequence]]
    [:app/view [:enum :posts :chart]]
    [:sort-key [:enum :score :num_comments]]
    [:subreddit/tabs [:vector [:map
