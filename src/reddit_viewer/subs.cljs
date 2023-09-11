@@ -33,9 +33,15 @@
    (:sort-key db)))
 
 (rf/reg-sub
- :posts
+ :subreddit/active-posts
  (fn [db _]
-   (:posts db)))
+   (let [current-subreddit-id (:subreddit/view db)]
+     (-> db :subreddit/subreddits current-subreddit-id :posts))))
+
+(rf/reg-sub
+ :subreddit/subreddits
+ (fn [db _]
+   (-> db :subreddit/subreddits)))
 
 (rf/reg-sub
  :subreddit/view

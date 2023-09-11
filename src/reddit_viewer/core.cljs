@@ -78,7 +78,7 @@
                                   :placeholder "Enter number of posts"
                                   :value       (or (:num-posts @draft) "")
                                   :on-change   (fn [e]
-                                                 (swap! draft assoc :num-posts (-> e .-target .-value)))}]]
+                                                 (swap! draft assoc :num-posts (js/parseInt (-> e .-target .-value))))}]]
        [:div.col-auto
         [:button.btn.btn-primary
          {:type     "submit"
@@ -93,20 +93,23 @@
    [:a.nav-link
     {:href "#"
      :class (when (= id view) "active")
-     :on-click #(rf/dispatch [:subreddit/swap-view id title])}
-    title
-    [:span.pl-2.close
-     {:on-click #(rf/dispatch [:subreddit/remove-subreddit-tab id])}
-     "\u00D7"]]])
+     :on-click #(rf/dispatch [:subreddit/swap-view id])}
+    title]
+   [:span.pl-2.close
+    {:on-click #(rf/dispatch [:subreddit/remove-subreddit-tab id])}
+    "\u00D7"]])
 
 (defn subreddit-tabs []
   (let [view @(rf/subscribe [:subreddit/view])
-        subreddits @(rf/subscribe [:subreddit/tabs])]
+        subreddit-tabs @(rf/subscribe [:subreddit/tabs])
+        subreddits @(rf/subscribe [:subreddit/subreddits])]
     [:ul.nav.nav-tabs.flex-sm-row.pt-2
      {:style {:flex-wrap "wrap"}}
-     (for [{:keys [id title]} subreddits]
-       ^{:key id}
-       [subreddit-tab title view id])]))
+     (for [subreddit-id subreddit-tabs]
+       ;; TODO component knows too much structural information?
+       (let [{:keys [subreddit-name]} (get-in subreddits [subreddit-id :metadata])]
+         ^{:key subreddit-id}
+         [subreddit-tab subreddit-name view subreddit-id]))]))
 
 (defn subreddit-content []
   (let [view @(rf/subscribe [:app/view])
@@ -116,7 +119,7 @@
       [:div
        [sort-buttons]
        [:div.card>div.card-block
-        (let [posts @(rf/subscribe [:posts])]
+        (let [posts @(rf/subscribe [:subreddit/active-posts])]
           (if (empty? posts)
             [:div.pt-2 "No posts to show :("]
             (case view

@@ -19,22 +19,31 @@
           (select-keys post [:score :num_comments :id :title :permalink :url]))
         posts))
 
+(defn extract-posts [raw-posts]
+  (->> (get-in raw-posts [:data :children])
+       (map :data)
+       (find-posts-with-preview)
+       (select-interesting-post-keys)))
+
+(def default-subreddit-sort-key :score)
+
 (rf/reg-event-db
  :set-posts
  [db/standard-interceptors]
- (fn [db [_ posts]]
-   (assoc db :posts
-          (->> (get-in posts [:data :children])
-               (map :data)
-               (find-posts-with-preview)
-               (select-interesting-post-keys)))))
+ (fn [db [_ raw-posts subreddit-id search-params]]
+   (let [posts (extract-posts raw-posts)
+         subreddit {:metadata (merge {:id subreddit-id
+                                      :sort-key default-subreddit-sort-key}
+                                     search-params)
+                    :posts posts}]
+     (assoc-in db [:subreddit/subreddits subreddit-id] subreddit))))
+
 
 (rf/reg-event-db
  :subreddit/add-subreddit-tab
  [db/standard-interceptors]
- (fn [db [_ id subreddit]]
-   (update db :subreddit/tabs conj {:id    id
-                                    :title subreddit})))
+ (fn [db [_ id]]
+   (update db :subreddit/tabs conj id)))
 
 (rf/reg-fx
  :ajax-get
@@ -51,22 +60,23 @@
 (rf/reg-event-fx
  :subreddit/swap-view
  [db/standard-interceptors]
- (fn [{db :db} [_ id subreddit]]
-   (let [reddit-url (utils/generate-reddit-url subreddit 10)]
-     {:db       (assoc db :subreddit/view id)
-      :ajax-get [reddit-url #(rf/dispatch [:set-posts %])]})))
+ (fn [{db :db} [_ id]]
+   {:db (assoc db :subreddit/view id)}))
 
 (rf/reg-event-fx
  :load-posts
  [db/standard-interceptors (rf/inject-cofx :uuid)]
  (fn [{:keys [db uuid]} [_ subreddit num-posts]]
    (let [subreddit-id uuid
-         reddit-url (utils/generate-reddit-url subreddit num-posts)]
-     {:db (assoc db :subreddit/view subreddit-id
-                 :subreddit/loading-posts? true)
+         reddit-url (utils/generate-reddit-url subreddit num-posts)
+         search-params {:subreddit-name subreddit
+                        :num-posts num-posts}
+         ui-transition {:subreddit/view subreddit-id
+                        :subreddit/loading-posts? true}]
+     {:db (merge db ui-transition)
       :fx [[:ajax-get [reddit-url #(when %
-                                     (rf/dispatch [:subreddit/add-subreddit-tab subreddit-id subreddit])
-                                     (rf/dispatch [:set-posts %])
+                                     (rf/dispatch [:subreddit/add-subreddit-tab subreddit-id])
+                                     (rf/dispatch [:set-posts % subreddit-id search-params])
                                      (rf/dispatch [:subreddit/set-loading-status false]))]]]})))
 
 (rf/reg-event-db
@@ -79,9 +89,15 @@
  :sort-posts
  [db/standard-interceptors]
  (fn [db [_ sort-key]]
-   (-> db
-       (assoc :sort-key sort-key)
-       (update :posts (partial sort-by sort-key >)))))
+   (let [current-subreddit-id (:subreddit/view db)
+         sort-fn (partial sort-by sort-key >)]
+     (-> db
+         (assoc :sort-key sort-key)
+         (assoc-in [:subreddit/subreddits current-subreddit-id :metadata :sort-key]
+                   sort-key)
+         (update-in [:subreddit/subreddits current-subreddit-id :posts]
+                    (fn [old-posts]
+                      (vec (sort-fn old-posts))))))))
 
 (rf/reg-event-db
  :select-view
@@ -89,26 +105,23 @@
  (fn [db [_ view]]
    (assoc db :app/view view)))
 
+(defn delete-from-tab-list-by-id
+  [current-tab-list target-id]
+  (into [] (remove #{target-id} current-tab-list)))
+
 (rf/reg-event-fx
  :subreddit/remove-subreddit-tab
  [db/standard-interceptors]
- (fn [{db :db} [_ evict-id]]
-   (let [tabs (:subreddit/tabs db)
-         view (:subreddit/view db)
-         evict-index (utils/get-evict-tab-index tabs evict-id)
-         replacement-index (utils/get-replacement-tab-index tabs evict-index)
-         {new-id :id new-subreddit :title} (get tabs replacement-index)
-         reddit-url (utils/generate-reddit-url new-subreddit 10)
-         evict-current? (= evict-id view)]
-     (merge (when (and evict-current? (> (count tabs) 1))
-              {:ajax-get [reddit-url #(rf/dispatch [:set-posts %])]})
-            {:db (-> db
-                     (cond->
-                      evict-current? (assoc :subreddit/view new-id)
-                      (= (count tabs) 1) (->
-                                          (assoc :posts [])
-                                          (assoc :subreddit/view nil)))
-                     (update :subreddit/tabs utils/remove-by-index evict-index))}))))
+ (fn [{:keys [db]} [_ target-id]]
+   (let [current-tab-list (:subreddit/tabs db)
+         target-index (utils/get-evict-tab-index current-tab-list target-id)
+         new-tab-list (delete-from-tab-list-by-id current-tab-list target-id)
+         new-subreddit-view-index (utils/get-replacement-tab-index current-tab-list target-index)
+         new-subreddit-view (get current-tab-list new-subreddit-view-index)]
+     {:db (-> db
+              (assoc :subreddit/tabs new-tab-list)
+              (update :subreddit/subreddits dissoc target-id)
+              (assoc :subreddit/view new-subreddit-view))})))
 
 ;; Co-effects
 

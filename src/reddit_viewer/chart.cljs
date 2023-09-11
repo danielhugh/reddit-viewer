@@ -50,5 +50,5 @@
         (destroy-chart chart))})))
 
 (defn chart-posts-by-votes []
-  (let [posts @(rf/subscribe [:posts])]
+  (let [posts @(rf/subscribe [:subreddit/active-posts])]
     [chart-posts-by-votes-inner posts]))

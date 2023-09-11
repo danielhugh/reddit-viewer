@@ -17,10 +17,6 @@
                 (or (empty? xs)
                     (apply distinct? xs)))]]))
 
-(comment
-
-  :rcf)
-
 ;; Schema
 
 (def app-db-schema
@@ -41,19 +37,27 @@
                             distinct-sequence]]
    [:app/view [:enum :posts :chart]]
    [:sort-key [:enum :score :num_comments]]
-   [:subreddit/tabs [:vector [:map
-                              [:id keyword?]
-                              [:title non-empty-string]]]]
+   [:subreddit/tabs [:and
+                     [:vector :keyword]
+                     distinct-sequence]]
    [:subreddit/loading-posts? boolean?]
-   [:subreddit/view {:optional true} keyword?]
-   [:posts [:vector
-            [:map
-             [:score int?]
-             [:num_comments int?]
-             [:id string?]
-             [:title string?]
-             [:permalink string?]
-             [:url string?]]]]])
+   [:subreddit/view {:optional true} [:maybe keyword?]]
+   [:subreddit/subreddits
+    [:map-of
+     :keyword [:map
+               [:metadata [:map
+                           [:id keyword?]
+                           [:sort-key [:enum :score :num_comments]]
+                           [:subreddit-name non-empty-string]
+                           [:num-posts {:min 1 :max 99} int?]]]
+               [:posts [:vector
+                        [:map
+                         [:score int?]
+                         [:num_comments int?]
+                         [:id string?]
+                         [:title string?]
+                         [:permalink string?]
+                         [:url string?]]]]]]]])
 
 (def initial-db
   {:app/sort-keys {:score {:id :score
@@ -70,7 +74,7 @@
    :sort-key :score
    :subreddit/tabs []
    :subreddit/loading-posts? true
-   :posts []})
+   :subreddit/subreddits {}})
 
 (def app-db-explainer
   (-> app-db-schema m/explainer))

@@ -11,21 +11,17 @@
 
 (defn get-evict-tab-index [tabs evict-id]
   (first (keep-indexed
-          (fn [index {id :id}]
-            (when (= id evict-id)
+          (fn [index current-id]
+            (when (= current-id evict-id)
               index))
           tabs)))
-
-(defn remove-by-index [vector index]
-  (into [] (concat (subvec vector 0 index)
-                   (subvec vector (inc index)))))
 
 (defn get-replacement-tab-index [tabs evict-index]
   (cond
     ;; the right most tab
     (= (inc evict-index) (count tabs))
     (if (= 1 (count tabs))
-      0
+      nil ;; no replacement as there is only 1 tab
       (dec evict-index))
 
     ;; otherwise its a tab somewhere in the middle, take the right tab
