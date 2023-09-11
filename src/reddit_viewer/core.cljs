@@ -104,8 +104,7 @@
   (let [view @(rf/subscribe [:subreddit/view])
         subreddit-tabs @(rf/subscribe [:subreddit/tabs])
         subreddits @(rf/subscribe [:subreddit/subreddits])]
-    [:ul.nav.nav-tabs.flex-sm-row.pt-2
-     {:style {:flex-wrap "wrap"}}
+    [:ul.nav.nav-tabs.flex-sm-row.pt-2.flex-wrap
      (for [subreddit-id subreddit-tabs]
        ;; TODO component knows too much structural information?
        (let [{:keys [subreddit-name]} (get-in subreddits [subreddit-id :metadata])]
