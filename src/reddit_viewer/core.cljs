@@ -6,7 +6,9 @@
    [reagent.dom :as rdom]
    [reddit-viewer.chart :as chart]
    [reddit-viewer.controllers]
-   [reddit-viewer.subs]))
+   [reddit-viewer.subs]
+   [reddit-viewer.utils.schema :refer [non-empty-string]]
+   [reddit-viewer.db :as db]))
 
 (defn sort-posts [{:keys [title id] :as _sort-posts-info} current-id]
   [:button.btn.btn-secondary

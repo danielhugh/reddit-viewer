@@ -1,21 +1,10 @@
 (ns reddit-viewer.db
-  (:require [malli.core :as m]
-            [malli.error :as me]
-            [reddit-viewer.utils :as u]
-            [re-frame.core :as rf]))
-
-;; Helpers
-
-(def non-empty-string
-  (m/schema [:string {:min 1}]))
-
-(def distinct-sequence
-  (m/schema [:and
-             [:sequential any?]
-             [:fn {:error/message "all elements should be distinct"}
-              (fn [xs]
-                (or (empty? xs)
-                    (apply distinct? xs)))]]))
+  (:require
+   [malli.core :as m]
+   [malli.error :as me]
+   [re-frame.core :as rf]
+   [reddit-viewer.utils.schema :refer [non-empty-string distinct-sequence]]
+   [reddit-viewer.utils :as u]))
 
 ;; Schema
 
