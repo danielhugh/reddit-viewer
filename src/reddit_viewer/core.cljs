@@ -67,6 +67,7 @@
                                   :required    true
                                   :title       "Enter subreddit"
                                   :placeholder "Enter subreddit"
+                                  :auto-focus true
                                   :value       (or (:subreddit @draft) "")
                                   :on-change   (fn [e]
                                                  (swap! draft assoc :subreddit (-> e .-target .-value)))}]]
