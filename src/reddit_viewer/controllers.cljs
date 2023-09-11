@@ -114,10 +114,14 @@
  [db/standard-interceptors]
  (fn [{:keys [db]} [_ target-id]]
    (let [current-tab-list (:subreddit/tabs db)
+         current-subreddit-view-id (:subreddit/view db)
          target-index (utils/get-evict-tab-index current-tab-list target-id)
          new-tab-list (delete-from-tab-list-by-id current-tab-list target-id)
          new-subreddit-view-index (utils/get-replacement-tab-index current-tab-list target-index)
-         new-subreddit-view (get current-tab-list new-subreddit-view-index)]
+         removing-current-subreddit? (= current-subreddit-view-id target-id)
+         new-subreddit-view (if removing-current-subreddit?
+                              (get current-tab-list new-subreddit-view-index)
+                              current-subreddit-view-id)]
      {:db (-> db
               (assoc :subreddit/tabs new-tab-list)
               (update :subreddit/subreddits dissoc target-id)
