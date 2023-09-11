@@ -3,7 +3,7 @@
 
 (def debug? ^boolean goog.DEBUG)
 
-(def reddit-origin "https://www.reddit.com")
+(def reddit-origin "https://old.reddit.com")
 
 (defn generate-reddit-url [subreddit num-posts]
   (str reddit-origin "/r/" subreddit ".json?sort=new&limit=" num-posts))
