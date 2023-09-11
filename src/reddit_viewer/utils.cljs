@@ -3,8 +3,10 @@
 
 (def debug? ^boolean goog.DEBUG)
 
+(def reddit-origin "https://www.reddit.com")
+
 (defn generate-reddit-url [subreddit num-posts]
-  (str "https://www.reddit.com/r/" subreddit ".json?sort=new&limit=" num-posts))
+  (str reddit-origin "/r/" subreddit ".json?sort=new&limit=" num-posts))
 
 (defn generate-uuid []
   (str/keyword (str (random-uuid))))

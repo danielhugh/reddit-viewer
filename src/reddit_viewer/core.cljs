@@ -7,6 +7,7 @@
    [reddit-viewer.chart :as chart]
    [reddit-viewer.controllers]
    [reddit-viewer.subs]
+   [reddit-viewer.utils :refer [reddit-origin]]
    [reddit-viewer.utils.schema :refer [non-empty-string]]
    [reddit-viewer.db :as db]))
 
@@ -30,7 +31,7 @@
   [:div.card.m-2
    [:div.card-body
     [:h4.card-title
-     [:a {:href (str "http://reddit.com" permalink)} title]]
+     [:a {:href (str reddit-origin permalink)} title]]
     [:div [:span.badge.badge-pill.badge-info
            (str subreddit " score " score)]]
     [:div [:span.badge.badge-pill.badge-info
