@@ -59,7 +59,7 @@
                                   (< 0 (:num-posts s) 100)))]
     [:div.bg-light.px-3.py-1
      [:h5.m-2 "Search Subreddit"]
-     [:form {:on-submit #(.preventDefault %)}
+     [:form
       [:div.row.align-items-center
        [:div.col-auto
         [:input.m-2.form-control {:type        "text"
@@ -84,6 +84,7 @@
          {:type     "submit"
           :disabled (not (valid-form? @draft))
           :on-click #(do
+                       (.preventDefault %)
                        (rf/dispatch [:load-posts (:subreddit @draft) (:num-posts @draft)])
                        (reset! draft {}))}
          "Search"]]]]]))
