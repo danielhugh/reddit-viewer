@@ -91,14 +91,15 @@
 
 (defn subreddit-tab [title view id]
   [:li.nav-item
-   [:a.nav-link
-    {:href "#"
-     :class (when (= id view) "active")
-     :on-click #(rf/dispatch [:subreddit/swap-view id])}
-    title]
-   [:span.pl-2.close
-    {:on-click #(rf/dispatch [:subreddit/remove-subreddit-tab id])}
-    "\u00D7"]])
+   [:div.nav-link
+    {:class (when (= id view) "active")}
+    [:a
+     {:href "#"
+      :on-click #(rf/dispatch [:subreddit/swap-view id])}
+     title]
+    [:button.pl-2.close
+     {:on-click #(rf/dispatch [:subreddit/remove-subreddit-tab id])}
+     "\u00D7"]]])
 
 (defn subreddit-tabs []
   (let [view @(rf/subscribe [:subreddit/view])
