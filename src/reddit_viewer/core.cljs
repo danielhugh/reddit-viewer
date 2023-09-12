@@ -1,13 +1,14 @@
 (ns reddit-viewer.core
-  (:require
-   [cuerdas.core :as str]
-   [re-frame.core :as rf]
-   [reagent.core :as r]
-   [reagent.dom :as rdom]
-   [reddit-viewer.chart :as chart]
-   [reddit-viewer.controllers]
-   [reddit-viewer.subs]
-   [reddit-viewer.utils :refer [reddit-origin]]))
+  (:require [malli.core :as m]
+            [malli.error :as me]
+            [re-frame.core :as rf]
+            [reagent.core :as r]
+            [reagent.dom :as rdom]
+            [reddit-viewer.chart :as chart]
+            [reddit-viewer.controllers]
+            [reddit-viewer.subs]
+            [reddit-viewer.utils :refer [reddit-origin]]
+            [reddit-viewer.utils.schema :refer [non-empty-string]]))
 
 (defn sort-posts [{:keys [title id] :as _sort-posts-info} current-id]
   [:button.btn.btn-light
@@ -53,11 +54,18 @@
    [:div.bounce2]
    [:div.bounce3]])
 
+(def subreddit-search-form-schema
+  [:map
+   [:subreddit non-empty-string]
+   [:num-posts [:and
+                pos-int?
+                [:fn {:error/message "should be between [1-99]"}
+                 #(< 0 % 100)]]]])
+
 (defn subreddit-search-bar []
   (r/with-let [draft (r/atom {})
                valid-form? (fn [s]
-                             (and (not (str/blank? (:subreddit s)))
-                                  (< 0 (:num-posts s) 100)))]
+                             (m/validate subreddit-search-form-schema s))]
     [:div.bg-light.px-3.py-1
      [:h5.m-2 "Search Subreddit"]
      [:form
@@ -80,7 +88,8 @@
                                   :placeholder "Enter number of posts"
                                   :value       (or (:num-posts @draft) "")
                                   :on-change   (fn [e]
-                                                 (swap! draft assoc :num-posts (js/parseInt (-> e .-target .-value))))}]]
+                                                 (let [num-posts (or (parse-long (-> e .-target .-value)) "")]
+                                                   (swap! draft assoc :num-posts num-posts)))}]]
        [:div.col-auto
         [:button.btn.btn-primary
          {:type     "submit"
