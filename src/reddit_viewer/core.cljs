@@ -10,7 +10,7 @@
    [reddit-viewer.utils :refer [reddit-origin]]))
 
 (defn sort-posts [{:keys [title id] :as _sort-posts-info} current-id]
-  [:button.btn.btn-secondary
+  [:button.btn.btn-light
    {:class (when (= id current-id) "active")
     :on-click #(rf/dispatch [:sort-posts id])}
    (str "sort posts by " title)])
