@@ -18,7 +18,7 @@
 (defn sort-buttons []
   (let [sort-keys @(rf/subscribe [:app/sort-keys])
         sort-keys-list @(rf/subscribe [:app/sort-keys-list])
-        current-sort-key @(rf/subscribe [:sort-key])]
+        current-sort-key @(rf/subscribe [:subreddit/sort-key])]
     [:div.btn-group.py-3
      (for [sort-key-id sort-keys-list]
        (let [sort-key-info (get sort-keys sort-key-id)]

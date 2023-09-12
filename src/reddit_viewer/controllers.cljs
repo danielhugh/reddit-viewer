@@ -25,19 +25,14 @@
        (find-posts-with-preview)
        (select-interesting-post-keys)))
 
-(def default-subreddit-sort-key :score)
-
 (rf/reg-event-db
  :set-posts
  [db/standard-interceptors]
  (fn [db [_ raw-posts subreddit-id search-params]]
    (let [posts (extract-posts raw-posts)
-         subreddit {:metadata (merge {:id subreddit-id
-                                      :sort-key default-subreddit-sort-key}
-                                     search-params)
+         subreddit {:metadata (merge {:id subreddit-id} search-params)
                     :posts posts}]
      (assoc-in db [:subreddit/subreddits subreddit-id] subreddit))))
-
 
 (rf/reg-event-db
  :subreddit/add-subreddit-tab
@@ -85,6 +80,9 @@
  (fn [db [_ status]]
    (assoc db :subreddit/loading-posts? status)))
 
+(defn sort-posts [posts sort-fn]
+  (vec (sort-fn posts)))
+
 (rf/reg-event-db
  :sort-posts
  [db/standard-interceptors]
@@ -92,12 +90,11 @@
    (let [current-subreddit-id (:subreddit/view db)
          sort-fn (partial sort-by sort-key >)]
      (-> db
-         (assoc :sort-key sort-key)
          (assoc-in [:subreddit/subreddits current-subreddit-id :metadata :sort-key]
                    sort-key)
          (update-in [:subreddit/subreddits current-subreddit-id :posts]
                     (fn [old-posts]
-                      (vec (sort-fn old-posts))))))))
+                      (sort-posts old-posts sort-fn)))))))
 
 (rf/reg-event-db
  :select-view

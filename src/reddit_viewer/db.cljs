@@ -25,7 +25,6 @@
                             [:vector :keyword]
                             distinct-sequence]]
    [:app/view [:enum :posts :chart]]
-   [:sort-key [:enum :score :num_comments]]
    [:subreddit/tabs [:and
                      [:vector :keyword]
                      distinct-sequence]]
@@ -36,7 +35,7 @@
      :keyword [:map
                [:metadata [:map
                            [:id keyword?]
-                           [:sort-key [:enum :score :num_comments]]
+                           [:sort-key {:optional true} [:enum :score :num_comments]]
                            [:subreddit-name non-empty-string]
                            [:num-posts {:min 1 :max 99} int?]]]
                [:posts [:vector
@@ -60,7 +59,6 @@
                               :title "Chart"}}
    :app/navbar-items-list [:posts :chart]
    :app/view :posts
-   :sort-key :score
    :subreddit/tabs []
    :subreddit/loading-posts? true
    :subreddit/subreddits {}})

@@ -28,9 +28,10 @@
    (:app/sort-keys-list db)))
 
 (rf/reg-sub
- :sort-key
+ :subreddit/sort-key
  (fn [db _]
-   (:sort-key db)))
+   (let [current-subreddit-id (:subreddit/view db)]
+     (-> db :subreddit/subreddits current-subreddit-id :metadata :sort-key))))
 
 (rf/reg-sub
  :subreddit/active-posts
