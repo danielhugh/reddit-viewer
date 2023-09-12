@@ -7,9 +7,7 @@
    [reddit-viewer.chart :as chart]
    [reddit-viewer.controllers]
    [reddit-viewer.subs]
-   [reddit-viewer.utils :refer [reddit-origin]]
-   [reddit-viewer.utils.schema :refer [non-empty-string]]
-   [reddit-viewer.db :as db]))
+   [reddit-viewer.utils :refer [reddit-origin]]))
 
 (defn sort-posts [{:keys [title id] :as _sort-posts-info} current-id]
   [:button.btn.btn-secondary
