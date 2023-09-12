@@ -13,8 +13,8 @@
      :data    {:labels   (map :title data)
                :datasets [{:label "votes"
                            :data  (map :score data)}
-                          #_{:label "comments"
-                             :data  (map :num_comments data)}]}
+                          {:label "comments"
+                           :data  (map :num_comments data)}]}
      :options {:scales {:xAxes [{:display false}]}}})))
 
 (defn destroy-chart [chart]
