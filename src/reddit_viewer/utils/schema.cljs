@@ -11,3 +11,8 @@
               (fn [xs]
                 (or (empty? xs)
                     (apply distinct? xs)))]]))
+
+(def date?
+  [:fn {:error/message "should be a date"}
+   (fn [d]
+     (instance? js/Date d))])

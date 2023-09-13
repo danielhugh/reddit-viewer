@@ -3,7 +3,7 @@
    [malli.core :as m]
    [malli.error :as me]
    [re-frame.core :as rf]
-   [reddit-viewer.utils.schema :refer [non-empty-string distinct-sequence]]
+   [reddit-viewer.utils.schema :refer [non-empty-string distinct-sequence date?]]
    [reddit-viewer.utils :as u]))
 
 ;; Schema
@@ -14,7 +14,7 @@
                       :keyword [:map
                                 [:status int?]
                                 [:status-text string?]
-                                [:created-on any?]]]]
+                                [:created-on date?]]]]
    [:app/site-errors-list [:and
                            [:vector :keyword]
                            distinct-sequence]]
