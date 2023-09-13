@@ -82,8 +82,9 @@
                                                  (swap! draft assoc :subreddit (-> e .-target .-value)))}]]
        [:div.col-auto
         [:input.m-2.form-control {:type        "number"
-                                  :pattern     "^[1-9]{1}\\d?$"
                                   :required    true
+                                  :min         1
+                                  :max         99
                                   :title       "Number between [1-99]"
                                   :placeholder "Enter number of posts"
                                   :value       (or (:num-posts @draft) "")
