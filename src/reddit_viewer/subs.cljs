@@ -58,3 +58,18 @@
  :subreddit/loading-posts?
  (fn [db _]
    (:subreddit/loading-posts? db)))
+
+(rf/reg-sub
+ :app/site-errors
+ (fn [db _]
+   (:app/site-errors db)))
+
+(rf/reg-sub
+ :app/site-errors-list
+ (fn [db _]
+   (:app/site-errors-list db)))
+
+(rf/reg-sub
+ :app/site-error-by-id
+ (fn [db [_ error-id]]
+   (-> db :app/site-errors error-id)))

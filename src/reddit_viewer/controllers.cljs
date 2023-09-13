@@ -58,6 +58,37 @@
  (fn [{db :db} [_ id]]
    {:db (assoc db :subreddit/view id)}))
 
+(defn load-posts-success
+  [subreddit-id search-params res]
+  (rf/dispatch [:subreddit/add-subreddit-tab subreddit-id])
+  (rf/dispatch [:set-posts res subreddit-id search-params])
+  (rf/dispatch [:subreddit/set-loading-status false]))
+
+(rf/reg-event-fx
+ :app/add-site-error
+ [db/standard-interceptors (rf/inject-cofx :time-now) (rf/inject-cofx :uuid)]
+ (fn [{:keys [db time-now uuid]} [_ res]]
+   (let [error (assoc res :created-on time-now :id uuid)
+         new-db (-> db
+                    (update :app/site-errors-list conj uuid)
+                    (assoc-in [:app/site-errors uuid] error))]
+     {:db new-db})))
+
+(rf/reg-event-db
+ :app/remove-site-error-by-id
+ [db/standard-interceptors]
+ (fn [db [_ error-id]]
+   (-> db
+       (update :app/site-errors dissoc error-id)
+       (update :app/site-errors-list
+               (fn [old-site-errors-list]
+                 (vec (remove #{error-id} old-site-errors-list)))))))
+
+(defn load-posts-failure
+  [res]
+  (rf/dispatch [:subreddit/set-loading-status false])
+  (rf/dispatch [:app/add-site-error res]))
+
 (rf/reg-event-fx
  :load-posts
  [db/standard-interceptors (rf/inject-cofx :uuid)]
@@ -69,10 +100,9 @@
          ui-transition {:subreddit/view subreddit-id
                         :subreddit/loading-posts? true}]
      {:db (merge db ui-transition)
-      :fx [[:ajax-get [reddit-url #(when %
-                                     (rf/dispatch [:subreddit/add-subreddit-tab subreddit-id])
-                                     (rf/dispatch [:set-posts % subreddit-id search-params])
-                                     (rf/dispatch [:subreddit/set-loading-status false]))]]]})))
+      :fx [[:ajax-get [reddit-url
+                       (partial load-posts-success subreddit-id search-params)
+                       (partial load-posts-failure)]]]})))
 
 (rf/reg-event-db
  :subreddit/set-loading-status
@@ -130,3 +160,8 @@
  :uuid
  (fn [coeffects _]
    (assoc coeffects :uuid (utils/generate-uuid))))
+
+(rf/reg-cofx
+ :time-now
+ (fn [coeffects _]
+   (assoc coeffects :time-now (js/Date.))))

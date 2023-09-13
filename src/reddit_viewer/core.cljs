@@ -1,5 +1,5 @@
 (ns reddit-viewer.core
-  (:require [malli.core :as m]
+  (:require [cuerdas.core :as str]
             [malli.error :as me]
             [re-frame.core :as rf]
             [reagent.core :as r]
@@ -8,7 +8,8 @@
             [reddit-viewer.controllers]
             [reddit-viewer.subs]
             [reddit-viewer.utils :refer [reddit-origin]]
-            [reddit-viewer.utils.schema :refer [non-empty-string]]))
+            [reddit-viewer.utils.schema :refer [non-empty-string]]
+            [malli.core :as m]))
 
 (defn sort-posts [{:keys [title id] :as _sort-posts-info} current-id]
   [:button.btn.btn-light
@@ -184,11 +185,30 @@
           ^{:key navbar-item-id}
           [navitem navitem-info current-view-id]))]]))
 
+(defn site-error [{:keys [id status status-text created-on]}]
+  [:div.alert.alert-danger.alert-dismissible
+   (str/fmt "Status: %s | %s" status status-text)
+   [:div.small (.toLocaleString created-on)]
+   [:button.btn.close
+    {:type "button"
+     :on-click #(rf/dispatch [:app/remove-site-error-by-id id])}
+    [:span "\u00D7"]]])
+
+(defn site-errors []
+  (let [errors-list @(rf/subscribe [:app/site-errors-list])]
+    [:div
+     (doall
+      (for [error-id errors-list]
+        (let [error-info @(rf/subscribe [:app/site-error-by-id error-id])]
+          ^{:key error-id}
+          [site-error error-info])))]))
+
 (defn home-page []
   [:div
    [navbar]
    [:div.w-100
     [subreddit-search-bar]
+    [site-errors]
     [:div.container
      [subreddit-tabs]
      (if @(rf/subscribe [:subreddit/loading-posts?])
