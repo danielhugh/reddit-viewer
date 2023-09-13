@@ -92,6 +92,11 @@
                                                  (let [num-posts (or (parse-long (-> e .-target .-value)) "")]
                                                    (swap! draft assoc :num-posts num-posts)))}]]
        [:div.col-auto
+        [:button.btn
+         {:type "button"
+          :on-click #(reset! draft {})}
+         "Reset"]]
+       [:div.col-auto
         [:button.btn.btn-primary
          {:type     "submit"
           :disabled (not (valid-form? @draft))
