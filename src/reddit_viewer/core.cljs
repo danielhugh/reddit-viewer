@@ -62,48 +62,68 @@
                 [:fn {:error/message "should be between [1-99]"}
                  #(< 0 % 100)]]]])
 
+(defn error-message
+  [form-state error-state k]
+  (let [error-msg (str (first (get error-state k)))]
+    [:small.text-danger
+     (when (and (contains? form-state k) (contains? error-state k))
+       error-msg)]))
+
 (defn subreddit-search-bar []
   (r/with-let [draft (r/atom {})
-               valid-form? (fn [s]
-                             (m/validate subreddit-search-form-schema s))]
+               form-errors (r/atom {})
+               reset-form (fn []
+                            (reset! draft {})
+                            (reset! form-errors nil))
+               validate-form (fn []
+                               (if-let [errors (-> (m/explain subreddit-search-form-schema @draft)
+                                                   me/humanize)]
+                                 (reset! form-errors errors)
+                                 (reset! form-errors nil)))
+               valid-form? (fn []
+                             (nil? @form-errors))]
     [:div.bg-light.px-3.py-1
      [:h5.m-2 "Search Subreddit"]
      [:form
-      [:div.row.align-items-center
-       [:div.col-auto
-        [:input.m-2.form-control {:type        "text"
-                                  :pattern     "^(?!\\s*$).+"
-                                  :required    true
-                                  :title       "Enter subreddit"
-                                  :placeholder "Enter subreddit"
-                                  :auto-focus true
-                                  :value       (or (:subreddit @draft) "")
-                                  :on-change   (fn [e]
-                                                 (swap! draft assoc :subreddit (-> e .-target .-value)))}]]
-       [:div.col-auto
-        [:input.m-2.form-control {:type        "number"
-                                  :required    true
-                                  :min         1
-                                  :max         99
-                                  :title       "Number between [1-99]"
-                                  :placeholder "Enter number of posts"
-                                  :value       (or (:num-posts @draft) "")
-                                  :on-change   (fn [e]
-                                                 (let [num-posts (or (parse-long (-> e .-target .-value)) "")]
-                                                   (swap! draft assoc :num-posts num-posts)))}]]
-       [:div.col-auto
+      [:div.form-row
+       [:div.col-auto.mb-3
+        [:input.form-control {:type        "text"
+                              :required    true
+                              :title       "Enter subreddit"
+                              :placeholder "Enter subreddit"
+                              :auto-focus  true
+                              :value       (or (:subreddit @draft) "")
+                              :on-change   (fn [e]
+                                             (swap! draft assoc :subreddit (-> e .-target .-value))
+                                             (validate-form))}]
+        [error-message @draft @form-errors :subreddit]]
+       [:div.col-auto.mb-3
+        [:input.form-control {:type        "number"
+                              :required    true
+                              :min 1
+                              :max 99
+                              :title       "Number between [1-99]"
+                              :placeholder "Enter number of posts"
+                              :value       (or (:num-posts @draft) "")
+                              :on-input    (fn [e]
+                                             (let [num-posts (or (parse-long (-> e .-target .-value)) "")]
+                                               (swap! draft assoc :num-posts num-posts)
+                                               (validate-form)))}]
+        [error-message @draft @form-errors :num-posts]]
+       [:div.col-auto.mb-3
         [:button.btn
          {:type "button"
-          :on-click #(reset! draft {})}
+          :on-click reset-form}
          "Reset"]]
-       [:div.col-auto
+       [:div.col-auto.mb-3
         [:button.btn.btn-primary
          {:type     "submit"
-          :disabled (not (valid-form? @draft))
+          :disabled (not (valid-form?))
           :on-click #(do
                        (.preventDefault %)
-                       (rf/dispatch [:load-posts (:subreddit @draft) (:num-posts @draft)])
-                       (reset! draft {}))}
+                       (when (valid-form?)
+                         (rf/dispatch [:load-posts (:subreddit @draft) (:num-posts @draft)])
+                         (reset-form)))}
          "Search"]]]]]))
 
 (defn subreddit-tab [title view id]
