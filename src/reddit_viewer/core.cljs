@@ -1,5 +1,7 @@
 (ns reddit-viewer.core
-  (:require [cuerdas.core :as str]
+  (:require ["react-toastify" :refer (ToastContainer toast)]
+            [cuerdas.core :as str]
+            [malli.core :as m]
             [malli.error :as me]
             [re-frame.core :as rf]
             [reagent.core :as r]
@@ -8,8 +10,7 @@
             [reddit-viewer.controllers]
             [reddit-viewer.subs]
             [reddit-viewer.utils :refer [reddit-origin]]
-            [reddit-viewer.utils.schema :refer [non-empty-string]]
-            [malli.core :as m]))
+            [reddit-viewer.utils.schema :refer [non-empty-string]]))
 
 (defn sort-posts [{:keys [title id] :as _sort-posts-info} current-id]
   [:button.btn.btn-light
@@ -206,8 +207,13 @@
 (defn home-page []
   [:div
    [navbar]
+   [:> ToastContainer {:theme "dark"}]
    [:div.w-100
     [subreddit-search-bar]
+    [:button.btn
+     {:on-click (fn []
+                  (toast (str "Time is: " (.toLocaleString (js/Date.)))))}
+     "Send toast"]
     [site-errors]
     [:div.container
      [subreddit-tabs]
