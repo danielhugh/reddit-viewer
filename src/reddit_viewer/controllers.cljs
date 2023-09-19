@@ -69,7 +69,9 @@
 
 (defn extract-http-error
   [{:keys [status status-text]}]
-  (str/fmt "Status: %s | %s" status status-text))
+  (case status
+    0 (str/fmt "Status: %s | %s | (If on Firefox, turn off Enhanced Tracking Protection)" status status-text)
+    (str/fmt "Status: %s | %s" status status-text)))
 
 (rf/reg-event-fx
  :app/add-site-error
