@@ -55,6 +55,11 @@
    (:subreddit/tabs db)))
 
 (rf/reg-sub
+ :subreddit/subreddit-metadata-by-id
+ (fn [db [_ subreddit-id]]
+   (-> db :subreddit/subreddits subreddit-id :metadata)))
+
+(rf/reg-sub
  :subreddit/loading-posts?
  (fn [db _]
    (:subreddit/loading-posts? db)))

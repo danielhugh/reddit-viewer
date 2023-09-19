@@ -128,29 +128,30 @@
                          (reset-form)))}
          "Search"]]]]]))
 
-(defn subreddit-tab [title view id]
-  [:li.nav-item
-   [:a.nav-link
-    {:href "#"
-     :class (when (= id view) "active")
-     :on-click #(rf/dispatch [:subreddit/swap-view id])}
-    title
-    [:button.pl-2.close
-     {:on-click (fn [e]
-                  (.stopPropagation e)
-                  (rf/dispatch [:subreddit/remove-subreddit-tab id]))}
-     "\u00D7"]]])
+(defn subreddit-tab
+  [{:keys [subreddit-name id]}]
+  (let [current-subreddit-view-id @(rf/subscribe [:subreddit/view])]
+    [:li.nav-item
+     [:a.nav-link
+      {:href "#"
+       :class (when (= id current-subreddit-view-id) "active")
+       :on-click #(rf/dispatch [:subreddit/swap-view id])}
+      subreddit-name
+      [:button.pl-2.close
+       {:on-click (fn [e]
+                    (.stopPropagation e)
+                    (rf/dispatch [:subreddit/remove-subreddit-tab id]))}
+       "\u00D7"]]]))
 
 (defn subreddit-tabs []
-  (let [view @(rf/subscribe [:subreddit/view])
-        subreddit-tabs @(rf/subscribe [:subreddit/tabs])
-        subreddits @(rf/subscribe [:subreddit/subreddits])]
+  (let [subreddit-tabs @(rf/subscribe [:subreddit/tabs])]
     [:ul.nav.nav-tabs.flex-sm-row.pt-2.flex-wrap
-     (for [subreddit-id subreddit-tabs]
-       ;; TODO component knows too much structural information?
-       (let [{:keys [subreddit-name]} (get-in subreddits [subreddit-id :metadata])]
-         ^{:key subreddit-id}
-         [subreddit-tab subreddit-name view subreddit-id]))]))
+     (doall
+      (for [subreddit-id subreddit-tabs]
+        (let [subreddit-info
+              @(rf/subscribe [:subreddit/subreddit-metadata-by-id subreddit-id])]
+          ^{:key subreddit-id}
+          [subreddit-tab subreddit-info])))]))
 
 (defn subreddit-content []
   (let [view @(rf/subscribe [:app/view])
