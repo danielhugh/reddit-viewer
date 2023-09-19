@@ -64,6 +64,7 @@
   [subreddit-id search-params res]
   (rf/dispatch [:subreddit/add-subreddit-tab subreddit-id])
   (rf/dispatch [:set-posts res subreddit-id search-params])
+  (rf/dispatch [:subreddit/swap-view subreddit-id])
   (rf/dispatch [:subreddit/set-loading-status false]))
 
 (defn extract-http-error
@@ -105,8 +106,7 @@
          reddit-url (utils/generate-reddit-url subreddit num-posts)
          search-params {:subreddit-name subreddit
                         :num-posts num-posts}
-         ui-transition {:subreddit/view subreddit-id
-                        :subreddit/loading-posts? true}]
+         ui-transition {:subreddit/loading-posts? true}]
      {:db (merge db ui-transition)
       :fx [[:ajax-get [reddit-url
                        (partial load-posts-success subreddit-id search-params)
