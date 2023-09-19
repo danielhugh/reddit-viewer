@@ -17,8 +17,3 @@
       (r/as-element
        [component message toast-opts])
       (clj->js toast-opts)))))
-
-(comment
-  (toast (clj->js {:type :error}))
-  :rcf)
-

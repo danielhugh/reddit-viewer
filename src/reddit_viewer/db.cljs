@@ -3,7 +3,7 @@
    [malli.core :as m]
    [malli.error :as me]
    [re-frame.core :as rf]
-   [reddit-viewer.utils.schema :refer [non-empty-string distinct-sequence date?]]
+   [reddit-viewer.utils.schema :refer [non-empty-string distinct-sequence]]
    [reddit-viewer.utils :as u]))
 
 ;; Schema

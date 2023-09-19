@@ -1,6 +1,5 @@
 (ns reddit-viewer.core
   (:require ["react-toastify" :refer (ToastContainer)]
-            [cuerdas.core :as str]
             [malli.core :as m]
             [malli.error :as me]
             [re-frame.core :as rf]

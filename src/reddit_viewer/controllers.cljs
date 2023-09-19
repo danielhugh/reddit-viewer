@@ -76,9 +76,8 @@
 (rf/reg-event-fx
  :app/emit-http-error-notification
  [db/standard-interceptors (rf/inject-cofx :time-now) (rf/inject-cofx :uuid)]
- (fn [{:keys [db time-now uuid]} [_ res]]
-   (let [error (assoc res :created-on time-now :id uuid)
-         error-message (extract-http-error res)]
+ (fn [_ [_ res]]
+   (let [error-message (extract-http-error res)]
      {:fx [[::toast/send-toast [error-message {:type :error}]]]})))
 
 (defn load-posts-failure
