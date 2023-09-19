@@ -13,6 +13,11 @@
    (:app/navbar-items db)))
 
 (rf/reg-sub
+ :app/navbar-item-by-id
+ (fn [db [_ navbar-item-id]]
+   (-> db :app/navbar-items navbar-item-id)))
+
+(rf/reg-sub
  :app/navbar-items-list
  (fn [db _]
    (:app/navbar-items-list db)))

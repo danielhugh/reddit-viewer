@@ -168,24 +168,24 @@
               :chart [chart/chart-posts-by-votes]
               :posts [display-posts posts])))]])))
 
-(defn navitem [{:keys [title id] :as _navitem-info} current-id]
-  [:li.nav-item
-   [:a.nav-link
-    {:href "#"
-     :class (when (= id current-id) "active")
-     :on-click #(rf/dispatch [:select-view id])}
-    title]])
+(defn navitem [{:keys [title id] :as _navitem-info}]
+  (let [current-view-id @(rf/subscribe [:app/view])]
+    [:li.nav-item
+     [:a.nav-link
+      {:href "#"
+       :class (when (= id current-view-id) "active")
+       :on-click #(rf/dispatch [:select-view id])}
+      title]]))
 
 (defn navbar []
-  (let [current-view-id @(rf/subscribe [:app/view])
-        navbar-items @(rf/subscribe [:app/navbar-items])
-        navbar-items-list @(rf/subscribe [:app/navbar-items-list])]
+  (let [navbar-items-list @(rf/subscribe [:app/navbar-items-list])]
     [:nav.navbar.navbar-light.bg-light.sticky-top.navbar-expand-md
      [:ul.navbar-nav.mr-auto.nav
-      (for [navbar-item-id navbar-items-list]
-        (let [navitem-info (get navbar-items navbar-item-id)]
-          ^{:key navbar-item-id}
-          [navitem navitem-info current-view-id]))]]))
+      (doall
+       (for [navbar-item-id navbar-items-list]
+         (let [navitem-info @(rf/subscribe [:app/navbar-item-by-id navbar-item-id])]
+           ^{:key navbar-item-id}
+           [navitem navitem-info])))]]))
 
 (defn site-error [{:keys [id status status-text created-on]}]
   [:div.alert.alert-danger.alert-dismissible
