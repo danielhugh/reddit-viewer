@@ -1,9 +1,11 @@
 (ns reddit-viewer.controllers
   (:require
    [ajax.core :as ajax]
+   [cuerdas.core :as str]
+   [re-frame.core :as rf]
+   [reddit-viewer.components.toast :as toast]
    [reddit-viewer.db :as db]
-   [reddit-viewer.utils :as utils]
-   [re-frame.core :as rf]))
+   [reddit-viewer.utils :as utils]))
 
 (rf/reg-event-db
  :initialize-db
@@ -64,6 +66,10 @@
   (rf/dispatch [:set-posts res subreddit-id search-params])
   (rf/dispatch [:subreddit/set-loading-status false]))
 
+(defn extract-http-error
+  [{:keys [status status-text]}]
+  (str/fmt "Status: %s | %s" status status-text))
+
 (rf/reg-event-fx
  :app/add-site-error
  [db/standard-interceptors (rf/inject-cofx :time-now) (rf/inject-cofx :uuid)]
@@ -71,8 +77,10 @@
    (let [error (assoc res :created-on time-now :id uuid)
          new-db (-> db
                     (update :app/site-errors-list conj uuid)
-                    (assoc-in [:app/site-errors uuid] error))]
-     {:db new-db})))
+                    (assoc-in [:app/site-errors uuid] error))
+         error-message (extract-http-error res)]
+     {:db new-db
+      :fx [[::toast/send-toast [error-message {:type :error}]]]})))
 
 (rf/reg-event-db
  :app/remove-site-error-by-id

@@ -1,5 +1,5 @@
 (ns reddit-viewer.core
-  (:require ["react-toastify" :refer (ToastContainer toast)]
+  (:require ["react-toastify" :refer (ToastContainer)]
             [cuerdas.core :as str]
             [malli.core :as m]
             [malli.error :as me]
@@ -213,11 +213,6 @@
                         :position "bottom-right"}]]
    [:main.w-100
     [subreddit-search-bar]
-    [:button.btn
-     {:on-click (fn []
-                  (toast (str "Time is: " (.toLocaleString (js/Date.)))))}
-     "Send toast"]
-    [site-errors]
     [:div.container
      [subreddit-tabs]
      (if @(rf/subscribe [:subreddit/loading-posts?])
