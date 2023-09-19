@@ -205,12 +205,13 @@
           [site-error error-info])))]))
 
 (defn home-page []
-  [:div
-   [navbar]
-   [:> ToastContainer {:theme "light"
-                       :autoClose false
-                       :position "bottom-right"}]
-   [:div.w-100
+  [:<>
+   [:header
+    [navbar]
+    [:> ToastContainer {:theme "light"
+                        :autoClose false
+                        :position "bottom-right"}]]
+   [:main.w-100
     [subreddit-search-bar]
     [:button.btn
      {:on-click (fn []
