@@ -207,7 +207,9 @@
 (defn home-page []
   [:div
    [navbar]
-   [:> ToastContainer {:theme "dark"}]
+   [:> ToastContainer {:theme "light"
+                       :autoClose false
+                       :position "bottom-right"}]
    [:div.w-100
     [subreddit-search-bar]
     [:button.btn
