@@ -74,31 +74,17 @@
     (str/fmt "Status: %s | %s" status status-text)))
 
 (rf/reg-event-fx
- :app/add-site-error
+ :app/emit-http-error-notification
  [db/standard-interceptors (rf/inject-cofx :time-now) (rf/inject-cofx :uuid)]
  (fn [{:keys [db time-now uuid]} [_ res]]
    (let [error (assoc res :created-on time-now :id uuid)
-         new-db (-> db
-                    (update :app/site-errors-list conj uuid)
-                    (assoc-in [:app/site-errors uuid] error))
          error-message (extract-http-error res)]
-     {:db new-db
-      :fx [[::toast/send-toast [error-message {:type :error}]]]})))
-
-(rf/reg-event-db
- :app/remove-site-error-by-id
- [db/standard-interceptors]
- (fn [db [_ error-id]]
-   (-> db
-       (update :app/site-errors dissoc error-id)
-       (update :app/site-errors-list
-               (fn [old-site-errors-list]
-                 (vec (remove #{error-id} old-site-errors-list)))))))
+     {:fx [[::toast/send-toast [error-message {:type :error}]]]})))
 
 (defn load-posts-failure
   [res]
   (rf/dispatch [:subreddit/set-loading-status false])
-  (rf/dispatch [:app/add-site-error res]))
+  (rf/dispatch [:app/emit-http-error-notification res]))
 
 (rf/reg-event-fx
  :load-posts

@@ -187,24 +187,6 @@
            ^{:key navbar-item-id}
            [navitem navitem-info])))]]))
 
-(defn site-error [{:keys [id status status-text created-on]}]
-  [:div.alert.alert-danger.alert-dismissible
-   (str/fmt "Status: %s | %s" status status-text)
-   [:div.small (.toLocaleString created-on)]
-   [:button.btn.close
-    {:type "button"
-     :on-click #(rf/dispatch [:app/remove-site-error-by-id id])}
-    [:span "\u00D7"]]])
-
-(defn site-errors []
-  (let [errors-list @(rf/subscribe [:app/site-errors-list])]
-    [:div
-     (doall
-      (for [error-id errors-list]
-        (let [error-info @(rf/subscribe [:app/site-error-by-id error-id])]
-          ^{:key error-id}
-          [site-error error-info])))]))
-
 (defn home-page []
   [:<>
    [:header

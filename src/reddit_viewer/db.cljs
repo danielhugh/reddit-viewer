@@ -10,14 +10,6 @@
 
 (def app-db-schema
   [:map
-   [:app/site-errors [:map-of
-                      :keyword [:map
-                                [:status int?]
-                                [:status-text string?]
-                                [:created-on date?]]]]
-   [:app/site-errors-list [:and
-                           [:vector :keyword]
-                           distinct-sequence]]
    [:app/sort-keys [:map-of
                     :keyword [:map
                               [:id keyword?]
@@ -56,9 +48,7 @@
                          [:url string?]]]]]]]])
 
 (def initial-db
-  {:app/site-errors {}
-   :app/site-errors-list []
-   :app/sort-keys {:score {:id :score
+  {:app/sort-keys {:score {:id :score
                            :title "score"}
                    :num_comments {:id :num_comments
                                   :title "comments"}}
