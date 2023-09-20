@@ -158,10 +158,10 @@
   (let [view @(rf/subscribe [:app/view])
         subreddits @(rf/subscribe [:subreddit/tabs])]
     (if (empty? subreddits)
-      [:div.pt-2 "Please search for a subreddit 😄"]
+      [:div.pt-2.text-center "Please search for a subreddit 😄"]
       (let [posts @(rf/subscribe [:subreddit/active-posts])]
         (if (empty? posts)
-          [:div.pt-2 "No posts to show 😞"]
+          [:div.pt-2.text-center "No posts to show 😞"]
           [:<>
            [sort-buttons]
            [:div.card>div.card-block
