@@ -48,11 +48,18 @@
        (find-posts-with-preview)
        (select-interesting-post-keys)))
 
+(def ff-protection-message
+  "If on Firefox, try turning off Enhanced Tracking Protection.")
+
 (defn extract-http-error
-  [{:keys [status status-text]}]
-  (case status
-    0 (str/fmt "Status: %s | %s | (If on Firefox, turn off Enhanced Tracking Protection)" status status-text)
-    (str/fmt "Status: %s | %s" status status-text)))
+  [{:keys [status status-text response]}]
+  (let [res-message (if (str/blank? status-text)
+                      (:message response)
+                      status-text)
+        base-message (str/fmt "%s: %s" status res-message)]
+    (cond-> base-message
+      (= status 0)
+      (str " " ff-protection-message))))
 
 (defn sort-posts [posts sort-fn]
   (vec (sort-fn posts)))
