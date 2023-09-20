@@ -33,3 +33,38 @@
     ;; should not happen
     :else
     (do (js/alert "Something went wrong >:|") nil)))
+
+(defn find-posts-with-preview [posts]
+  (filter #(= (:post_hint %) "image") posts))
+
+(defn select-interesting-post-keys [posts]
+  (mapv (fn [post]
+          (select-keys post [:score :num_comments :id :title :permalink :url]))
+        posts))
+
+(defn extract-posts [raw-posts]
+  (->> (get-in raw-posts [:data :children])
+       (map :data)
+       (find-posts-with-preview)
+       (select-interesting-post-keys)))
+
+(defn extract-http-error
+  [{:keys [status status-text]}]
+  (case status
+    0 (str/fmt "Status: %s | %s | (If on Firefox, turn off Enhanced Tracking Protection)" status status-text)
+    (str/fmt "Status: %s | %s" status status-text)))
+
+(defn sort-posts [posts sort-fn]
+  (vec (sort-fn posts)))
+
+(defn remove-id-from-tab-list
+  [current-tab-list target-id]
+  (into [] (remove #{target-id} current-tab-list)))
+
+(defn get-next-subreddit-view [current-tab-list current-subreddit-view-id target-id]
+  (let [target-index (get-evict-tab-index current-tab-list target-id)
+        new-subreddit-view-index (get-replacement-tab-index current-tab-list target-index)
+        removing-current-subreddit? (= current-subreddit-view-id target-id)]
+    (if removing-current-subreddit?
+      (get current-tab-list new-subreddit-view-index)
+      current-subreddit-view-id)))

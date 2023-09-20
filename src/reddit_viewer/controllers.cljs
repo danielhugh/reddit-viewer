@@ -1,7 +1,6 @@
 (ns reddit-viewer.controllers
   (:require
    [ajax.core :as ajax]
-   [cuerdas.core :as str]
    [re-frame.core :as rf]
    [reddit-viewer.components.toast :as toast]
    [reddit-viewer.db :as db]
@@ -13,25 +12,11 @@
  (fn [_ _]
    db/initial-db))
 
-(defn find-posts-with-preview [posts]
-  (filter #(= (:post_hint %) "image") posts))
-
-(defn select-interesting-post-keys [posts]
-  (mapv (fn [post]
-          (select-keys post [:score :num_comments :id :title :permalink :url]))
-        posts))
-
-(defn extract-posts [raw-posts]
-  (->> (get-in raw-posts [:data :children])
-       (map :data)
-       (find-posts-with-preview)
-       (select-interesting-post-keys)))
-
 (rf/reg-event-db
  :set-posts
  [db/standard-interceptors]
  (fn [db [_ raw-posts subreddit-id search-params]]
-   (let [posts (extract-posts raw-posts)
+   (let [posts (utils/extract-posts raw-posts)
          subreddit {:metadata (merge {:id subreddit-id} search-params)
                     :posts posts}]
      (assoc-in db [:subreddit/subreddits subreddit-id] subreddit))))
@@ -67,23 +52,17 @@
   (rf/dispatch [:subreddit/swap-view subreddit-id])
   (rf/dispatch [:subreddit/set-loading-status false]))
 
-(defn extract-http-error
-  [{:keys [status status-text]}]
-  (case status
-    0 (str/fmt "Status: %s | %s | (If on Firefox, turn off Enhanced Tracking Protection)" status status-text)
-    (str/fmt "Status: %s | %s" status status-text)))
+(defn load-posts-failure
+  [res]
+  (rf/dispatch [:subreddit/set-loading-status false])
+  (rf/dispatch [:app/emit-http-error-notification res]))
 
 (rf/reg-event-fx
  :app/emit-http-error-notification
  [db/standard-interceptors (rf/inject-cofx :time-now) (rf/inject-cofx :uuid)]
  (fn [_ [_ res]]
-   (let [error-message (extract-http-error res)]
+   (let [error-message (utils/extract-http-error res)]
      {:fx [[::toast/send-toast [error-message {:type :error}]]]})))
-
-(defn load-posts-failure
-  [res]
-  (rf/dispatch [:subreddit/set-loading-status false])
-  (rf/dispatch [:app/emit-http-error-notification res]))
 
 (rf/reg-event-fx
  :load-posts
@@ -105,9 +84,6 @@
  (fn [db [_ status]]
    (assoc db :subreddit/loading-posts? status)))
 
-(defn sort-posts [posts sort-fn]
-  (vec (sort-fn posts)))
-
 (rf/reg-event-db
  :sort-posts
  [db/standard-interceptors]
@@ -119,7 +95,7 @@
                    sort-key)
          (update-in [:subreddit/subreddits current-subreddit-id :posts]
                     (fn [old-posts]
-                      (sort-posts old-posts sort-fn)))))))
+                      (utils/sort-posts old-posts sort-fn)))))))
 
 (rf/reg-event-db
  :select-view
@@ -127,27 +103,24 @@
  (fn [db [_ view]]
    (assoc db :app/view view)))
 
-(defn delete-from-tab-list-by-id
-  [current-tab-list target-id]
-  (into [] (remove #{target-id} current-tab-list)))
-
 (rf/reg-event-fx
  :subreddit/remove-subreddit-tab
  [db/standard-interceptors]
  (fn [{:keys [db]} [_ target-id]]
    (let [current-tab-list (:subreddit/tabs db)
          current-subreddit-view-id (:subreddit/view db)
-         target-index (utils/get-evict-tab-index current-tab-list target-id)
-         new-tab-list (delete-from-tab-list-by-id current-tab-list target-id)
-         new-subreddit-view-index (utils/get-replacement-tab-index current-tab-list target-index)
-         removing-current-subreddit? (= current-subreddit-view-id target-id)
-         new-subreddit-view (if removing-current-subreddit?
-                              (get current-tab-list new-subreddit-view-index)
-                              current-subreddit-view-id)]
-     {:db (-> db
-              (assoc :subreddit/tabs new-tab-list)
-              (update :subreddit/subreddits dissoc target-id)
-              (assoc :subreddit/view new-subreddit-view))})))
+         next-tab-list (utils/remove-id-from-tab-list
+                        current-tab-list
+                        target-id)
+         next-subreddit-view (utils/get-next-subreddit-view
+                              current-tab-list
+                              current-subreddit-view-id
+                              target-id)
+         next-db (-> db
+                     (assoc :subreddit/tabs next-tab-list)
+                     (update :subreddit/subreddits dissoc target-id)
+                     (assoc :subreddit/view next-subreddit-view))]
+     {:db next-db})))
 
 ;; Co-effects
 
