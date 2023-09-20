@@ -197,7 +197,7 @@
                         :position "bottom-right"}]]
    [:main.w-100
     [subreddit-search-bar]
-    [:div.container
+    [:div.mx-5
      [subreddit-tabs]
      (if @(rf/subscribe [:subreddit/loading-posts?])
        [loading-spinner]
