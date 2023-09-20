@@ -13,7 +13,7 @@
    db/initial-db))
 
 (rf/reg-event-db
- :set-posts
+ :subreddit/set-posts
  [db/standard-interceptors]
  (fn [db [_ raw-posts subreddit-id search-params]]
    (let [posts (utils/extract-posts raw-posts)
@@ -48,7 +48,7 @@
 (defn load-posts-success
   [subreddit-id search-params res]
   (rf/dispatch [:subreddit/add-subreddit-tab subreddit-id])
-  (rf/dispatch [:set-posts res subreddit-id search-params])
+  (rf/dispatch [:subreddit/set-posts res subreddit-id search-params])
   (rf/dispatch [:subreddit/swap-view subreddit-id])
   (rf/dispatch [:subreddit/set-loading-status false]))
 
@@ -65,7 +65,7 @@
      {:fx [[::toast/send-toast [error-message {:type :error}]]]})))
 
 (rf/reg-event-fx
- :load-posts
+ :subreddit/load-posts
  [db/standard-interceptors (rf/inject-cofx :uuid)]
  (fn [{:keys [db uuid]} [_ subreddit num-posts]]
    (let [subreddit-id uuid
@@ -85,7 +85,7 @@
    (assoc db :subreddit/loading-posts? status)))
 
 (rf/reg-event-db
- :sort-posts
+ :subreddit/sort-posts
  [db/standard-interceptors]
  (fn [db [_ sort-key]]
    (let [current-subreddit-id (:subreddit/view db)
@@ -98,7 +98,7 @@
                       (utils/sort-posts old-posts sort-fn)))))))
 
 (rf/reg-event-db
- :select-view
+ :app/select-view
  [db/standard-interceptors]
  (fn [db [_ view]]
    (assoc db :app/view view)))

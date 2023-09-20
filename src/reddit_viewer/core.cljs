@@ -14,7 +14,7 @@
 (defn sort-posts [{:keys [title id] :as _sort-posts-info} current-id]
   [:button.btn.btn-light
    {:class (when (= id current-id) "active")
-    :on-click #(rf/dispatch [:sort-posts id])}
+    :on-click #(rf/dispatch [:subreddit/sort-posts id])}
    (str "sort posts by " title)])
 
 (defn sort-buttons []
@@ -123,7 +123,7 @@
           :on-click #(do
                        (.preventDefault %)
                        (when (valid-form?)
-                         (rf/dispatch [:load-posts (:subreddit @draft) (:num-posts @draft)])
+                         (rf/dispatch [:subreddit/load-posts (:subreddit @draft) (:num-posts @draft)])
                          (reset-form)))}
          "Search"]]]]]))
 
@@ -173,7 +173,7 @@
      [:a.nav-link
       {:href "#"
        :class (when (= id current-view-id) "active")
-       :on-click #(rf/dispatch [:select-view id])}
+       :on-click #(rf/dispatch [:app/select-view id])}
       title]]))
 
 (defn navbar []
@@ -212,5 +212,5 @@
 
 (defn init! []
   (rf/dispatch-sync [:initialize-db])
-  (rf/dispatch [:load-posts "Catloaf" 10])
+  (rf/dispatch [:subreddit/load-posts "Catloaf" 10])
   (mount-root))
