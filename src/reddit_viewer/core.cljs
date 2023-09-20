@@ -75,7 +75,7 @@
                form-errors (r/atom {})
                reset-form (fn []
                             (reset! draft {})
-                            (reset! form-errors nil))
+                            (reset! form-errors {}))
                validate-form (fn []
                                (if-let [errors (-> (m/explain subreddit-search-form-schema @draft)
                                                    me/humanize)]
