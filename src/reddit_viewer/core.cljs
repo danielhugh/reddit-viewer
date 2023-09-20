@@ -134,7 +134,9 @@
      [:a.nav-link
       {:href "#"
        :class (when (= id current-subreddit-view-id) "active")
-       :on-click #(rf/dispatch [:subreddit/swap-view id])}
+       :on-click (fn [_]
+                   (when (not= current-subreddit-view-id id)
+                     (rf/dispatch [:subreddit/swap-view id])))}
       subreddit-name
       [:button.pl-2.close
        {:on-click (fn [e]
