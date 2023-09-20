@@ -32,7 +32,7 @@
 
     ;; should not happen
     :else
-    (do (js/alert "Something went wrong >:|") nil)))
+    (do (js/alert "Something went wrong 🤔") nil)))
 
 (defn find-posts-with-preview [posts]
   (filter #(= (:post_hint %) "image") posts))

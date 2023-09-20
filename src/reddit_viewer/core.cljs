@@ -156,13 +156,13 @@
   (let [view @(rf/subscribe [:app/view])
         subreddits @(rf/subscribe [:subreddit/tabs])]
     (if (empty? subreddits)
-      [:div.pt-2 "Please search for a subreddit :)"]
+      [:div.pt-2 "Please search for a subreddit 😄"]
       [:div
        [sort-buttons]
        [:div.card>div.card-block
         (let [posts @(rf/subscribe [:subreddit/active-posts])]
           (if (empty? posts)
-            [:div.pt-2 "No posts to show :("]
+            [:div.pt-2 "No posts to show 😞"]
             (case view
               :chart [chart/chart-posts-by-votes]
               :posts [display-posts posts])))]])))
