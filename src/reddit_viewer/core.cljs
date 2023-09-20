@@ -157,15 +157,15 @@
         subreddits @(rf/subscribe [:subreddit/tabs])]
     (if (empty? subreddits)
       [:div.pt-2 "Please search for a subreddit 😄"]
-      [:div
-       [sort-buttons]
-       [:div.card>div.card-block
-        (let [posts @(rf/subscribe [:subreddit/active-posts])]
-          (if (empty? posts)
-            [:div.pt-2 "No posts to show 😞"]
+      (let [posts @(rf/subscribe [:subreddit/active-posts])]
+        (if (empty? posts)
+          [:div.pt-2 "No posts to show 😞"]
+          [:<>
+           [sort-buttons]
+           [:div.card>div.card-block
             (case view
               :chart [chart/chart-posts-by-votes]
-              :posts [display-posts posts])))]])))
+              :posts [display-posts posts])]])))))
 
 (defn navitem [{:keys [title id] :as _navitem-info}]
   (let [current-view-id @(rf/subscribe [:app/view])]
