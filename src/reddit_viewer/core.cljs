@@ -101,8 +101,6 @@
        [:div.col-auto.mb-3
         [:input.form-control {:type        "number"
                               :required    true
-                              :min 1
-                              :max 99
                               :title       "Number between [1-99]"
                               :placeholder "Enter number of posts"
                               :value       (or (:num-posts @draft) "")
