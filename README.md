@@ -58,7 +58,7 @@ The app will not work if Firefox's Enhanced Tracking Protection is enabled as it
 
 The following were some goals for the project:
 
-***Practice using and thinking in the re-frame framework, and its more advanced features.***
+***Practice using and thinking in the re-frame framework, and using its more advanced features.***
 
 This was largely achieved. I practiced working with the re-frame application state (`app-db`) and organized it following the [Indexed Entities Pattern](https://ericnormand.me/guide/database-structure-in-re-frame#Indexed-Entities-Pattern). I challenged myself to not use pre-made components (like those provided by the [re-com](https://github.com/day8/re-com) library) which forced me to think about the balance between local state and global state. The re-frame docs suggest that everything should be in the global `app-db`, but for localized forms that did not feel right to me. I ended up using local Reagent atoms to store transient state, and only interact with global state when capturing an intent that would change the rest of the app, like when submitting a form.
 
