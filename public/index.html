@@ -7,14 +7,12 @@
       src="https://www.googletagmanager.com/gtag/js?id=G-F3KTQ6J0RS"
     ></script>
     <script>
-      let host = window.location.hostname;
-      if (host != "localhost") {
+      if (window.location.hostname !== "localhost") {
         window.dataLayer = window.dataLayer || [];
         function gtag() {
           dataLayer.push(arguments);
         }
         gtag("js", new Date());
-
         gtag("config", "G-F3KTQ6J0RS");
       }
     </script>
