@@ -1,21 +1,34 @@
 (ns reddit-viewer.chart
   (:require
-   ["chart.js" :as chart]
+   ["chart.js" :refer [Chart Colors BarController CategoryScale LinearScale BarElement Legend Tooltip]]
    ["react" :as react]
    [re-frame.core :as rf]
    [reagent.core :as r]))
 
+(defn- register-chart []
+  ;; See: https://www.chartjs.org/docs/latest/getting-started/integration.html#bundle-optimization
+  (.register Chart
+             Colors
+             BarController
+             BarElement
+             CategoryScale
+             LinearScale
+             Legend
+             Tooltip))
+
 (defn render-data [node data]
-  (chart.
+  (register-chart)
+  (Chart.
    node
    (clj->js
-    {:type    "bar"
-     :data    {:labels   (map :title data)
-               :datasets [{:label "votes"
-                           :data  (map :score data)}
-                          {:label "comments"
-                           :data  (map :num_comments data)}]}
-     :options {:scales {:xAxes [{:display false}]}}})))
+    {:type "bar"
+     :data {:labels (map :title data)
+            :datasets [{:label "votes"
+                        :data  (map :score data)}
+                       {:label "comments"
+                        :data  (map :num_comments data)}]}
+     :options {:plugins {:tooltip {:enabled true}}
+               :scales {:x {:display false}}}})))
 
 (defn destroy-chart [chart]
   (when @chart
